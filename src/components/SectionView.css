@@ -17,6 +17,7 @@
 
 .section__head {
   max-width: var(--content-max);
+  margin-inline: auto;
 }
 
 .section__eyebrow {

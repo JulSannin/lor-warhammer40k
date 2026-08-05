@@ -28,6 +28,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+  text-align: center;
   padding-block: 4rem;
   background:
     radial-gradient(ellipse 80% 50% at 50% 0%, #1c1512 0%, transparent 70%);
@@ -56,54 +58,18 @@
   color: var(--muted);
 }
 
-.intro__meta {
-  margin-top: 3rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--line);
-  max-width: 46ch;
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  letter-spacing: 0.1em;
-  color: var(--faint);
-}
 
-/* ---------------- Маячок подгрузки ---------------- */
+/* ---------------- Виртуализованный список разделов ---------------- */
 
 /*
- * Стоит за последним смонтированным разделом и служит двум целям сразу:
- * это цель IntersectionObserver и подсказка читателю, что дальше есть что
- * читать. К моменту, когда блок доходит до экрана, следующий раздел уже
- * построен и маячок уезжает вниз.
+ * Разделы вынуты из потока и расставлены сдвигом: их положение задаёт
+ * виртуализатор, а высоту контейнера — сумма оценок. Благодаря этому
+ * документ не растёт по мере чтения и ползунок прокрутки стоит на месте.
  */
-.next {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.6rem;
-  padding-block: 4rem 6rem;
-  border-top: 1px solid var(--line);
-}
-
-.next__label {
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--gold-dim);
-}
-
-.next__title {
-  font-family: var(--font-display);
-  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.next__bar {
-  width: 4rem;
-  height: 2px;
-  background: linear-gradient(to right, var(--gold-dim), transparent);
+.sections__slot {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
 }
 
 /* ---------------- Подвал ---------------- */

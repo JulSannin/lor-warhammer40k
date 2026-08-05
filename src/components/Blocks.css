@@ -12,12 +12,15 @@
   margin-top: 1.15rem;
 }
 
+/* Колонка текста стоит по центру полосы; сам текст выключен влево —
+   центрированные абзацы длинного лора читать невозможно. */
 .blk-heading,
 .blk-p,
 .blk-list,
 .blk-quote,
 .blk-disputed {
   max-width: var(--content-max);
+  margin-inline: auto;
 }
 
 /* ---------------- Текст ---------------- */
