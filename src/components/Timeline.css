@@ -1,6 +1,5 @@
 .tl {
-  max-width: calc(var(--content-max) + 10rem);
-  margin: 3.5rem 0 0 auto;
+  margin-top: 3.5rem;
   padding: 1.75rem 0 0;
   border-top: 1px solid var(--line);
 }
