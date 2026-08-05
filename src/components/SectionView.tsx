@@ -1,21 +1,15 @@
 import { motion } from 'motion/react'
 import type { Section } from '../data/types'
-import './SectionShell.css'
+import { Blocks } from './Blocks'
+import './SectionView.css'
 
-/**
- * Оболочка раздела: шапка, эпоха, лид и главный кадр.
- *
- * Содержимое разделов (абзацы, таблицы, ленты событий) подключается
- * на следующих этапах — сейчас нужен реальный поток страницы, по которому
- * можно проверить навигацию и подсветку активного раздела.
- */
 /** `(005.М31 — 014.М31)` и `005.М31 — 014.М31` — одно и то же. */
 const sameDates = (a: string, b: string) =>
   a.replace(/[()\s]/g, '') === b.replace(/[()\s]/g, '')
 
-export function SectionShell({ section }: { section: Section }) {
-  // Датировка из markdown у половины разделов дословно повторяет эпоху
-  // в шапке — показываем её только если она добавляет что-то новое.
+export function SectionView({ section }: { section: Section }) {
+  // Датировка из markdown у всех разделов, где она есть, дословно повторяет
+  // эпоху в шапке — показываем её, только если она добавляет что-то новое.
   const subtitle =
     section.subtitle && !sameDates(section.subtitle, section.era) ? section.subtitle : null
 
@@ -71,10 +65,9 @@ export function SectionShell({ section }: { section: Section }) {
         </motion.figure>
       )}
 
-      <p className="section__todo">
-        {section.blocks.length} блоков текста, {section.events.length} событий ленты,{' '}
-        {section.images.length} изображений — рендер на следующих этапах
-      </p>
+      <div className="section__body">
+        <Blocks blocks={section.blocks} images={section.images} />
+      </div>
     </section>
   )
 }
