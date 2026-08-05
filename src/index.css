@@ -1,0 +1,152 @@
+/* ===========================================================
+   Токены темы — «имперская готика»
+   =========================================================== */
+:root {
+  /* Поверхности */
+  --void: #070706;
+  --bg: #0a0908;
+  --surface: #121010;
+  --surface-2: #1a1716;
+  --line: #2a2422;
+  --line-strong: #3d3430;
+
+  /* Текст */
+  --bone: #e9e3d5;
+  --text: #cfc7b8;
+  --muted: #8d8377;
+  --faint: #5d5650;
+
+  /* Акценты */
+  --gold: #c8a54b;
+  --gold-bright: #e6c877;
+  --gold-dim: #6d5a2a;
+  --blood: #8c1c13;
+  --blood-bright: #c4291c;
+
+  /* Типографика */
+  --font-display: 'Forum', 'Times New Roman', serif;
+  --font-body: 'PT Serif', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  /* Размеры */
+  --rail-w: 68px;
+  --rail-w-open: 320px;
+  --content-max: 76ch;
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  color-scheme: dark;
+}
+
+/* ===========================================================
+   Сброс
+   =========================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+a {
+  color: var(--gold);
+  text-decoration-color: var(--gold-dim);
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--gold-bright);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--bone);
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--gold-dim);
+  color: var(--bone);
+}
+
+/* Полоса прокрутки */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--void);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-dim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
