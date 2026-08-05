@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { SkeletonTheme } from 'react-loading-skeleton'
 import { GlobalTimeline } from './components/GlobalTimeline'
@@ -26,7 +34,7 @@ export default function App() {
   const virtualizer = useWindowVirtualizer({
     count: sections.length,
     estimateSize: (i) => sectionHeights[i],
-    overscan: 1,
+    overscan: 2,
     scrollMargin: listTop,
   })
 
@@ -41,10 +49,19 @@ export default function App() {
 
   const items = virtualizer.getVirtualItems()
 
+  /*
+   * Построение раздела — это около пятисот узлов разом, и на кадре, когда
+   * это происходит, прокрутка спотыкается. useDeferredValue отдаёт эту
+   * работу в низкий приоритет: React разбивает её на части и уступает
+   * браузеру между ними, поэтому вместо одного длинного кадра получается
+   * несколько обычных. Запас overscan даёт время добраться до конца.
+   */
+  const deferredItems = useDeferredValue(items)
+
   const visibleIds = useMemo(
-    () => items.map((i) => sections[i.index].id),
+    () => deferredItems.map((i) => sections[i.index].id),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items.map((i) => i.index).join(',')],
+    [deferredItems.map((i) => i.index).join(',')],
   )
 
   const activeId = useScrollSpy(visibleIds)
@@ -160,7 +177,7 @@ export default function App() {
               className="sections"
               style={{ height: totalSize, position: 'relative' }}
             >
-              {items.map((item) => (
+              {deferredItems.map((item) => (
                 <div
                   key={item.key}
                   data-index={item.index}
