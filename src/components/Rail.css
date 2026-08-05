@@ -1,0 +1,280 @@
+.rail {
+  position: fixed;
+  inset-block: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+}
+
+/* ---------------- Свёрнутая полоса ---------------- */
+
+.rail__strip {
+  position: relative;
+  width: var(--rail-w);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding-block: 1.25rem;
+  background: linear-gradient(to right, var(--void), var(--surface));
+  border-right: 1px solid var(--line);
+}
+
+.rail__brand {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--gold-dim);
+}
+
+.rail__marks {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rail__mark {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--faint);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  border-radius: 2px;
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+
+.rail__mark:hover {
+  color: var(--bone);
+}
+
+.rail__mark.is-active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* Полоса прочитанного */
+.rail__progress {
+  width: 2px;
+  height: 22%;
+  background: var(--line-strong);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.rail__progress-fill {
+  width: 100%;
+  background: linear-gradient(to bottom, var(--gold-dim), var(--gold));
+}
+
+.rail__percent {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------- Раскрытая панель ---------------- */
+
+.rail__panel {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: var(--rail-w-open);
+  max-width: 88vw;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1rem 1.5rem;
+  background: var(--surface);
+  border-right: 1px solid var(--line-strong);
+  box-shadow: 24px 0 48px -24px rgb(0 0 0 / 0.8);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.rail__panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.rail__panel-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.rail__pin {
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  color: var(--faint);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.rail__pin:hover,
+.rail__pin.is-pinned {
+  color: var(--gold);
+  border-color: var(--gold-dim);
+}
+
+.rail__list {
+  flex: 1;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rail__item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.5rem 0.6rem;
+  color: var(--muted);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  border-radius: 2px;
+  transition:
+    color 0.18s var(--ease),
+    background 0.18s var(--ease),
+    border-color 0.18s var(--ease);
+}
+
+.rail__item:hover {
+  color: var(--bone);
+  background: var(--surface-2);
+}
+
+.rail__item.is-active {
+  color: var(--bone);
+  border-left-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.rail__item-mark {
+  flex: none;
+  width: 1.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-align: right;
+  color: var(--faint);
+}
+
+.rail__item.is-active .rail__item-mark {
+  color: var(--accent);
+}
+
+.rail__item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.rail__item-label {
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.rail__item-era {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.05em;
+  color: var(--faint);
+}
+
+.rail__hint {
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--faint);
+}
+
+/* ---------------- Мобильная версия ---------------- */
+
+.rail-burger {
+  display: none;
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 60;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  font-size: 1rem;
+  color: var(--gold);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+}
+
+.rail__scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  width: 100%;
+  background: rgb(0 0 0 / 0.6);
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .rail-burger {
+    display: grid;
+  }
+  .rail__strip {
+    display: none;
+  }
+  .rail:not(.rail--open) {
+    pointer-events: none;
+  }
+  .rail__panel {
+    position: fixed;
+    z-index: 50;
+  }
+  /* Освобождаем место под кнопку-бургер, которая лежит поверх панели */
+  .rail__panel-head {
+    padding-left: 2.75rem;
+  }
+  .rail__scrim {
+    display: block;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
