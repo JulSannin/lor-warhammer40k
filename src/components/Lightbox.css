@@ -50,32 +50,34 @@
 
 /* ---------------- Попап ---------------- */
 
+/*
+ * Кнопки листания лежат поверх кадра, а не отдельными колонками сетки:
+ * колонками они отъедали у картинки по 3rem с каждой стороны, а места
+ * по краям полноэкранного кадра и так хватает.
+ */
 .lb {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: clamp(0.5rem, 2vw, 2rem);
-  padding: clamp(1rem, 4vw, 3rem);
+  place-items: center;
+  padding: clamp(0.5rem, 1.5vw, 1.25rem);
   background: rgb(4 4 3 / 0.94);
   backdrop-filter: blur(6px);
 }
 
 .lb__figure {
-  grid-column: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 0.9rem;
   max-height: 100%;
   min-width: 0;
 }
 
 .lb__figure img {
   max-width: 100%;
-  max-height: 78vh;
+  max-height: 88vh;
   width: auto;
   height: auto;
   object-fit: contain;
@@ -125,14 +127,17 @@
 }
 
 .lb__nav {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
   width: 3rem;
-  height: 4.5rem;
+  height: 5rem;
   display: grid;
   place-items: center;
   font-size: 2rem;
   line-height: 1;
   color: var(--muted);
-  background: transparent;
+  background: rgb(10 9 8 / 0.55);
   border: 1px solid transparent;
   border-radius: 2px;
   transition: color 0.2s var(--ease), background 0.2s var(--ease);
@@ -145,37 +150,23 @@
 }
 
 .lb__nav--prev {
-  grid-column: 1;
+  left: clamp(0.25rem, 1vw, 1rem);
 }
 
 .lb__nav--next {
-  grid-column: 3;
+  right: clamp(0.25rem, 1vw, 1rem);
 }
 
 @media (max-width: 640px) {
-  .lb {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
-    justify-items: center;
-  }
-  .lb__figure {
-    grid-column: 1;
-    grid-row: 1;
-  }
   .lb__figure img {
-    max-height: 68vh;
+    max-height: 74vh;
   }
+  /* На узком экране кнопки уходят вниз, чтобы не лежать поверх картинки */
   .lb__nav {
-    grid-row: 2;
+    top: auto;
+    bottom: 0.75rem;
+    translate: none;
     width: 4rem;
     height: 3rem;
-  }
-  .lb__nav--prev {
-    grid-column: 1;
-    justify-self: start;
-  }
-  .lb__nav--next {
-    grid-column: 1;
-    justify-self: end;
   }
 }

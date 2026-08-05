@@ -15,7 +15,7 @@
  * кадры от текста. 1680px — предел, на котором кадр 16:7 ещё не выше экрана.
  */
 .app__content {
-  max-width: 1680px;
+  max-width: 1440px;
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
