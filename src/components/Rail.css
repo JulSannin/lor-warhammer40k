@@ -107,6 +107,25 @@
   box-shadow: 24px 0 48px -24px rgb(0 0 0 / 0.8);
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* Закрытое состояние: visibility убирает ссылки из обхода клавиатурой,
+     а переход по ней с задержкой даёт доиграть исчезновению */
+  visibility: hidden;
+  opacity: 0;
+  translate: -24px 0;
+  transition:
+    opacity 0.22s var(--ease),
+    translate 0.22s var(--ease),
+    visibility 0s linear 0.22s;
+}
+
+.rail__panel.is-open {
+  visibility: visible;
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 0.22s var(--ease),
+    translate 0.22s var(--ease),
+    visibility 0s;
 }
 
 .rail__panel-head {
@@ -137,7 +156,9 @@
   color: var(--faint);
   border: 1px solid var(--line);
   border-radius: 2px;
-  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
 }
 
 .rail__pin:hover,
@@ -165,7 +186,9 @@
   height: 3px;
   background: var(--line-strong);
   border-radius: 1px;
-  transition: background 0.2s var(--ease), height 0.2s var(--ease);
+  transition:
+    background 0.2s var(--ease),
+    height 0.2s var(--ease);
 }
 
 .rail__axis-tick.is-timeless {

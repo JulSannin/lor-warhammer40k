@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
 import Skeleton from 'react-loading-skeleton'
 import type { SectionImage } from '../data/types'
 import { LightboxContext, useLightbox } from './lightbox-context'
@@ -66,7 +65,8 @@ export function LightboxProvider({
   }, [])
 
   const step = useCallback(
-    (delta: number) => setIndex((i) => (i === null ? i : (i + delta + images.length) % images.length)),
+    (delta: number) =>
+      setIndex((i) => (i === null ? i : (i + delta + images.length) % images.length)),
     [images.length],
   )
 
@@ -121,74 +121,62 @@ export function LightboxProvider({
     <LightboxContext.Provider value={api}>
       {children}
 
-      <AnimatePresence>
-        {current && (
-          <motion.div
-            className="lb"
-            role="dialog"
-            aria-modal="true"
-            aria-label={current.alt}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) close()
-            }}
+      {current && (
+        <div
+          className="lb"
+          role="dialog"
+          aria-modal="true"
+          aria-label={current.alt}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) close()
+          }}
+        >
+          <button
+            type="button"
+            className="lb__close"
+            onClick={close}
+            ref={closeRef}
+            data-focusable
           >
+            <span aria-hidden="true">✕</span>
+            <span className="visually-hidden">Закрыть</span>
+          </button>
+
+          {images.length > 1 && (
             <button
               type="button"
-              className="lb__close"
-              onClick={close}
-              ref={closeRef}
+              className="lb__nav lb__nav--prev"
+              onClick={() => step(-1)}
               data-focusable
             >
-              <span aria-hidden="true">✕</span>
-              <span className="visually-hidden">Закрыть</span>
+              <span aria-hidden="true">‹</span>
+              <span className="visually-hidden">Предыдущее изображение</span>
             </button>
+          )}
 
-            {images.length > 1 && (
-              <button
-                type="button"
-                className="lb__nav lb__nav--prev"
-                onClick={() => step(-1)}
-                data-focusable
-              >
-                <span aria-hidden="true">‹</span>
-                <span className="visually-hidden">Предыдущее изображение</span>
-              </button>
-            )}
+          <figure className="lb__figure" key={current.src}>
+            <LightboxImage image={current} />
+            <figcaption>
+              <span className="lb__caption">{current.caption}</span>
+              <span className="lb__counter">
+                {(index ?? 0) + 1} / {images.length}
+              </span>
+            </figcaption>
+          </figure>
 
-            <motion.figure
-              className="lb__figure"
-              key={current.src}
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
+          {images.length > 1 && (
+            <button
+              type="button"
+              className="lb__nav lb__nav--next"
+              onClick={() => step(1)}
+              data-focusable
             >
-              <LightboxImage image={current} />
-              <figcaption>
-                <span className="lb__caption">{current.caption}</span>
-                <span className="lb__counter">
-                  {(index ?? 0) + 1} / {images.length}
-                </span>
-              </figcaption>
-            </motion.figure>
-
-            {images.length > 1 && (
-              <button
-                type="button"
-                className="lb__nav lb__nav--next"
-                onClick={() => step(1)}
-                data-focusable
-              >
-                <span aria-hidden="true">›</span>
-                <span className="visually-hidden">Следующее изображение</span>
-              </button>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <span aria-hidden="true">›</span>
+              <span className="visually-hidden">Следующее изображение</span>
+            </button>
+          )}
+        </div>
+      )}
     </LightboxContext.Provider>
   )
 }

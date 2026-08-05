@@ -1,12 +1,4 @@
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { SkeletonTheme } from 'react-loading-skeleton'
 import { GlobalTimeline } from './components/GlobalTimeline'
@@ -49,19 +41,10 @@ export default function App() {
 
   const items = virtualizer.getVirtualItems()
 
-  /*
-   * Построение раздела — это около пятисот узлов разом, и на кадре, когда
-   * это происходит, прокрутка спотыкается. useDeferredValue отдаёт эту
-   * работу в низкий приоритет: React разбивает её на части и уступает
-   * браузеру между ними, поэтому вместо одного длинного кадра получается
-   * несколько обычных. Запас overscan даёт время добраться до конца.
-   */
-  const deferredItems = useDeferredValue(items)
-
   const visibleIds = useMemo(
-    () => deferredItems.map((i) => sections[i.index].id),
+    () => items.map((i) => sections[i.index].id),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [deferredItems.map((i) => i.index).join(',')],
+    [items.map((i) => i.index).join(',')],
   )
 
   const activeId = useScrollSpy(visibleIds)
@@ -149,6 +132,15 @@ export default function App() {
     <SkeletonTheme baseColor="#17140f" highlightColor="#241f18" duration={1.6}>
       <LightboxProvider images={allImages}>
         <div className={`app${pinned ? ' app--pinned' : ''}`}>
+          {/*
+            Обход навигации — первым в порядке обхода, иначе с клавиатуры
+            до текста придётся пройти тринадцать остановок в боковой
+            панели. Ссылка не видна, пока на неё не встал фокус.
+          */}
+          <a className="skip-link" href="#содержание">
+            Перейти к содержанию
+          </a>
+
           <Rail
             sections={sections}
             activeId={activeId}
@@ -157,7 +149,7 @@ export default function App() {
             onPinnedChange={setPinned}
           />
 
-          <main className="app__content">
+          <main className="app__content" id="содержание" tabIndex={-1}>
             <header className="intro">
               <p className="intro__eyebrow">В мрачной тьме далёкого будущего</p>
               <h1 className="intro__title">
@@ -177,7 +169,7 @@ export default function App() {
               className="sections"
               style={{ height: totalSize, position: 'relative' }}
             >
-              {deferredItems.map((item) => (
+              {items.map((item) => (
                 <div
                   key={item.key}
                   data-index={item.index}

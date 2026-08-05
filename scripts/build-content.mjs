@@ -194,13 +194,20 @@ function auditInline(text, where) {
     .replace(/\[[^\]]+\]\([^)]+\)/g, '')
   const leftovers = stripped.match(/[*_`~]|\[|\]\(/g)
   if (leftovers) {
-    warn(`${where}: непарная inline-разметка (${[...new Set(leftovers)].join(' ')}) — «${text.slice(0, 60)}…»`)
+    warn(
+      `${where}: непарная inline-разметка (${[...new Set(leftovers)].join(' ')}) — «${text.slice(0, 60)}…»`,
+    )
   }
 }
 
 function walkText(blocks, where) {
   for (const b of blocks) {
-    if (b.type === 'paragraph' || b.type === 'quote' || b.type === 'disputed' || b.type === 'heading') {
+    if (
+      b.type === 'paragraph' ||
+      b.type === 'quote' ||
+      b.type === 'disputed' ||
+      b.type === 'heading'
+    ) {
       auditInline(b.text, where)
     } else if (b.type === 'list') {
       b.items.forEach((it) => auditInline(it, where))
@@ -279,7 +286,8 @@ if (sections.length !== SLUGS.length) {
 }
 
 const payload = {
-  $generatedBy: 'scripts/build-content.mjs — не редактируйте вручную, правьте WARHAMMER_40K_LORE.md',
+  $generatedBy:
+    'scripts/build-content.mjs — не редактируйте вручную, правьте WARHAMMER_40K_LORE.md',
   docTitle,
   epigraph,
   sections,
