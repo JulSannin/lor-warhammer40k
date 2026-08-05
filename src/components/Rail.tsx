@@ -31,6 +31,7 @@ export function Rail({ sections, activeId, progress, pinned, onPinnedChange }: R
   const panelId = useId()
 
   const open = pinned || hovered || mobileOpen
+  const activeEra = sections.find((s) => s.id === activeId)?.era ?? null
 
   // Escape закрывает панель — и раскрытую наведением, и закреплённую.
   useEffect(() => {
@@ -134,6 +135,32 @@ export function Rail({ sections, activeId, progress, pinned, onPinnedChange }: R
                     {pinned ? 'Открепить панель' : 'Закрепить панель'}
                   </span>
                 </button>
+              </div>
+
+              {/*
+                Компактная шкала «где я во времени». Засечки стоят равномерно,
+                а не по годам: линейная ось растянула бы шестьдесят миллионов
+                лет и схлопнула бы весь Империум в точку. Масштаб несёт подпись.
+              */}
+              <div className="rail__axis">
+                <div className="rail__axis-track" aria-hidden="true">
+                  {sections.map((s) => (
+                    <span
+                      key={s.id}
+                      className={
+                        'rail__axis-tick' +
+                        (s.id === activeId ? ' is-active' : '') +
+                        (s.year === null ? ' is-timeless' : '')
+                      }
+                      style={{ '--accent': s.accent } as React.CSSProperties}
+                    />
+                  ))}
+                </div>
+                <p className="rail__axis-caption">
+                  <span>~60 млн до н.э.</span>
+                  <span>М42</span>
+                </p>
+                {activeEra && <p className="rail__axis-now">{activeEra}</p>}
               </div>
 
               <ol className="rail__list">

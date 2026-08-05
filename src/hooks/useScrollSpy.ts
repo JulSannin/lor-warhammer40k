@@ -7,11 +7,13 @@ import { useEffect, useState } from 'react'
  * на трети экрана сверху. Полоса, а не точка, — чтобы короткие разделы
  * тоже успевали стать активными, и чтобы значение не дребезжало на границе.
  *
- * Последнее известное значение сохраняется: у самого верха и низа страницы
- * полосу не пересекает никто, и сбрасывать подсветку в этот момент незачем.
+ * Внизу документа полосу не пересекает никто — там подсветка удерживается
+ * на последнем разделе. А вот выше первого раздела (титульный экран,
+ * обзорная хронология) удерживать нечего: там подсветка снимается, иначе
+ * в самом верху страницы горит последний раздел, до которого дочитали.
  */
 export function useScrollSpy(ids: string[]): string | null {
-  const [active, setActive] = useState<string | null>(ids[0] ?? null)
+  const [active, setActive] = useState<string | null>(null)
 
   useEffect(() => {
     if (ids.length === 0) return
@@ -27,7 +29,16 @@ export function useScrollSpy(ids: string[]): string | null {
         }
         // Из всех попавших в полосу берём первый по порядку документа.
         const first = ids.find((id) => visible.has(id))
-        if (first) setActive(first)
+        if (first) {
+          setActive(first)
+          return
+        }
+        // Ничего не пересекает: если первый раздел ещё ниже полосы, значит
+        // мы над содержанием — гасим подсветку. Иначе оставляем как было.
+        const head = document.getElementById(ids[0])
+        if (head && head.getBoundingClientRect().top > window.innerHeight * 0.3) {
+          setActive(null)
+        }
       },
       { rootMargin: '-30% 0px -55% 0px', threshold: 0 },
     )

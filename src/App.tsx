@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { GlobalTimeline } from './components/GlobalTimeline'
 import { Rail } from './components/Rail'
 import { SectionView } from './components/SectionView'
 import { useScrollProgress } from './hooks/useScrollProgress'
@@ -39,6 +40,8 @@ export default function App() {
             {sections.length} частей · от ~60 000 000 лет до н.э. до М42
           </p>
         </header>
+
+        <GlobalTimeline sections={sections} />
 
         {sections.map((s) => (
           <SectionView key={s.id} section={s} />
