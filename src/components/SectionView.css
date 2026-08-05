@@ -25,26 +25,44 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-color: color-mix(in srgb, var(--accent) 4%, var(--bg));
+  /*
+   * Только градиенты, без маски. Маска выносила подложку в отдельный слой
+   * композитора, который перерисовывался на каждом кадре прокрутки; замер
+   * показал 34 кадра дольше 50мс без подложки против 159 с ней. Здесь тот
+   * же эффект набран слоями заливки: вертикальное растворение узкой полосой
+   * у стыков и приглушение у боковых краёв.
+   *
+   * Зоны растворения заданы в пикселях, а не в процентах: у раздела длиной
+   * в семь тысяч пикселей проценты дали бы полосу в разы шире, чем
+   * у короткого.
+   */
   background-image:
-    radial-gradient(
-      ellipse 90% 45% at 12% 12%,
-      color-mix(in srgb, var(--accent) 9%, transparent),
-      transparent 62%
+    /* Верхний слой возвращает общий фон у боковых краёв — так полоса
+       сливается с полем по бокам, но без маски и лишнего слоя композитора */
+    linear-gradient(
+      to right,
+      var(--bg) 0,
+      transparent 80px,
+      transparent calc(100% - 80px),
+      var(--bg) 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      color-mix(in srgb, var(--accent) 5%, var(--bg)) 120px,
+      color-mix(in srgb, var(--accent) 5%, var(--bg)) calc(100% - 120px),
+      transparent 100%
     ),
     radial-gradient(
-      ellipse 80% 45% at 88% 88%,
+      ellipse 70% 30% at 15% 8%,
+      color-mix(in srgb, var(--accent) 8%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 65% 30% at 85% 92%,
       color-mix(in srgb, var(--accent) 6%, transparent),
-      transparent 58%
+      transparent 70%
     );
-  -webkit-mask-image:
-    linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%),
-    linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%),
-    linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
-  mask-composite: intersect;
 }
 
 /* Невидимая цель для якорей из исходного markdown */

@@ -22,11 +22,17 @@
 }
 
 .rail__brand {
+  padding: 0.25rem 0.35rem;
   font-family: var(--font-mono);
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   color: var(--gold-dim);
+  border-radius: 2px;
+}
+
+.rail__brand:hover {
+  color: var(--gold);
 }
 
 .rail__marks {
@@ -40,6 +46,7 @@
   list-style: none;
 }
 
+/* Индикатор, а не кнопка: клики по свёрнутой полосе не принимаются */
 .rail__mark {
   display: grid;
   place-items: center;
@@ -48,16 +55,13 @@
   font-family: var(--font-mono);
   font-size: 0.78rem;
   color: var(--faint);
-  text-decoration: none;
   border-left: 2px solid transparent;
   border-radius: 2px;
+  pointer-events: none;
+  user-select: none;
   transition:
     color 0.2s var(--ease),
     border-color 0.2s var(--ease);
-}
-
-.rail__mark:hover {
-  color: var(--bone);
 }
 
 .rail__mark.is-active {

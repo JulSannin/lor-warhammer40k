@@ -33,6 +33,15 @@ export function Rail({ sections, activeId, progress, pinned, onPinnedChange }: R
   const open = pinned || hovered || mobileOpen
   const activeEra = sections.find((s) => s.id === activeId)?.era ?? null
 
+  /*
+   * Раскрытие наведением — только там, где есть мышь. На тач-устройстве
+   * касание тоже присылает mouseenter, и состояние наведения зависало:
+   * панель не закрывалась после выбора раздела, потому что «курсор» с неё
+   * формально так и не ушёл.
+   */
+  const canHover = () =>
+    typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches
+
   // Escape закрывает панель — и раскрытую наведением, и закреплённую.
   useEffect(() => {
     if (!open) return
@@ -46,10 +55,13 @@ export function Rail({ sections, activeId, progress, pinned, onPinnedChange }: R
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onPinnedChange])
 
-  const go = () => {
-    setHovered(false)
-    setMobileOpen(false)
-  }
+  /*
+   * Выбор раздела не закрывает панель на десктопе: она раскрыта наведением
+   * и должна закрыться, когда с неё увели курсор, — иначе после клика она
+   * схлопывается под курсором и следующий выбор требует нового наведения.
+   * На мобильной панель перекрывает страницу, поэтому там закрываем.
+   */
+  const go = () => setMobileOpen(false)
 
   return (
     <>
@@ -69,26 +81,38 @@ export function Rail({ sections, activeId, progress, pinned, onPinnedChange }: R
       <nav
         className={`rail${open ? ' rail--open' : ''}`}
         aria-label="Разделы"
-        onMouseEnter={() => setHovered(true)}
+        onMouseEnter={() => canHover() && setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {/* Свёрнутая полоса: номера частей и полоса прочитанного */}
-        <div className="rail__strip" aria-hidden={open ? 'true' : undefined}>
-          <span className="rail__brand">40K</span>
+        {/*
+          Свёрнутая полоса — только индикатор: номер текущей части и доля
+          прочитанного. Кликать по ней нельзя, иначе после закрытия панели
+          курсор остаётся над полосой и попадает по цифре, которая оказалась
+          под ним случайно. Переходы делаются из раскрытой панели.
+        */}
+        <div className="rail__strip" aria-hidden="true">
+          {/* Единственная точка входа с клавиатуры и с тача */}
+          <button
+            type="button"
+            className="rail__brand"
+            aria-hidden={open ? 'true' : undefined}
+            tabIndex={open ? -1 : 0}
+            onFocus={() => setHovered(true)}
+            onClick={() => onPinnedChange(!pinned)}
+          >
+            <span aria-hidden="true">40K</span>
+            <span className="visually-hidden">Открыть список разделов</span>
+          </button>
 
           <ul className="rail__marks">
             {sections.map((s) => (
               <li key={s.id}>
-                <a
-                  href={`#${s.id}`}
+                <span
                   className={`rail__mark${s.id === activeId ? ' is-active' : ''}`}
                   style={{ '--accent': s.accent } as React.CSSProperties}
-                  tabIndex={open ? -1 : 0}
-                  title={s.navLabel}
                 >
-                  <span aria-hidden="true">{railMark(s)}</span>
-                  <span className="visually-hidden">{s.navLabel}</span>
-                </a>
+                  {railMark(s)}
+                </span>
               </li>
             ))}
           </ul>
