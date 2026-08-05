@@ -1,7 +1,7 @@
 import generated from './content.generated.json' with { type: 'json' }
 import { meta } from './meta'
 import { images } from './images'
-import type { GeneratedContent, Section, TimelineEvent } from './types'
+import type { GeneratedContent, Section, SectionImage, TimelineEvent } from './types'
 
 // JSON-импорт даёт `type: string` вместо литеральных типов блоков, поэтому
 // прямое приведение TypeScript отвергает. Форму гарантирует генератор
@@ -38,6 +38,22 @@ export const sections: Section[] = assemble()
 
 export const docTitle = content.docTitle
 export const epigraph = content.epigraph
+
+/**
+ * Все изображения в том порядке, в каком они встречаются на странице:
+ * сначала кадр в шапке раздела, затем картинки по тексту в порядке
+ * подзаголовков, к которым они привязаны. Этот порядок задаёт переходы
+ * «вперёд-назад» в попапе, поэтому он должен совпадать с версткой.
+ */
+function inPageOrder(section: Section): SectionImage[] {
+  const inline = section.images
+    .filter((i) => i.role === 'inline')
+    .slice()
+    .sort((a, b) => (a.afterHeading ?? Infinity) - (b.afterHeading ?? Infinity))
+  return section.hero ? [section.hero, ...inline] : inline
+}
+
+export const allImages: SectionImage[] = sections.flatMap(inPageOrder)
 
 /** Раздел по короткому id или по якорю из markdown. */
 export function findSection(key: string): Section | undefined {

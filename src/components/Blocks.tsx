@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import type { Block, SectionImage } from '../data/types'
+import { ZoomableImage } from './Lightbox'
 import { RichText } from './RichText'
 import './Blocks.css'
 
@@ -96,15 +97,7 @@ function InlineImage({ image }: { image: SectionImage }) {
       viewport={{ once: true, margin: '-10% 0px' }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
     >
-      <img
-        src={image.src}
-        alt={image.alt}
-        width={image.width}
-        height={image.height}
-        loading="lazy"
-        decoding="async"
-        referrerPolicy="no-referrer"
-      />
+      <ZoomableImage image={image} />
       <figcaption>{image.caption}</figcaption>
     </motion.figure>
   )

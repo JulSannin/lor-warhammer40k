@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import type { Section } from '../data/types'
 import { Blocks } from './Blocks'
+import { ZoomableImage } from './Lightbox'
 import { Timeline } from './Timeline'
 import './SectionView.css'
 
@@ -53,15 +54,7 @@ export function SectionView({ section }: { section: Section }) {
           viewport={{ once: true, margin: '-10% 0px' }}
           transition={{ duration: 0.7, ease: 'easeOut' }}
         >
-          <img
-            src={section.hero.src}
-            alt={section.hero.alt}
-            width={section.hero.width}
-            height={section.hero.height}
-            loading="lazy"
-            decoding="async"
-            referrerPolicy="no-referrer"
-          />
+          <ZoomableImage image={section.hero} />
           <figcaption>{section.hero.caption}</figcaption>
         </motion.figure>
       )}
