@@ -112,7 +112,7 @@ export const meta: Record<string, SectionMeta> = {
     era: 'М15 — М30',
     year: 14_000,
     lead: 'У человечества был золотой век. Он закончился восстанием машин и десятью тысячелетиями тьмы.',
-    accent: '#c2456f',
+    accent: '#d55b81',
     events: [
       {
         date: 'М15 — М25',
@@ -204,7 +204,7 @@ export const meta: Record<string, SectionMeta> = {
     era: '005.М31 — 014.М31',
     year: 30_005,
     lead: 'Девять лет, после которых Империум перестал развиваться и начал гнить.',
-    accent: '#c4291c',
+    accent: '#d94436',
     events: [
       {
         date: '005.М31',
@@ -311,7 +311,7 @@ export const meta: Record<string, SectionMeta> = {
     era: 'вне времени',
     year: null,
     lead: 'Четыре бога, рождённые чувствами смертных, и вечная Великая Игра друг против друга.',
-    accent: '#7d3ac1',
+    accent: '#a86ee6',
     events: [],
   },
 

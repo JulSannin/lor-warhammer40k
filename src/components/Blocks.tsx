@@ -1,0 +1,170 @@
+import { motion } from 'motion/react'
+import type { Block, SectionImage } from '../data/types'
+import { RichText } from './RichText'
+import './Blocks.css'
+
+function BlockView({ block }: { block: Block }) {
+  switch (block.type) {
+    case 'heading':
+      return (
+        <h3 className="blk-heading" id={block.anchor}>
+          <RichText text={block.text} />
+        </h3>
+      )
+
+    case 'paragraph':
+      return (
+        <p className="blk-p">
+          <RichText text={block.text} />
+        </p>
+      )
+
+    case 'list':
+      return block.ordered ? (
+        <ol className="blk-list blk-list--ordered">
+          {block.items.map((item, i) => (
+            <li key={i}>
+              <RichText text={item} />
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <ul className="blk-list">
+          {block.items.map((item, i) => (
+            <li key={i}>
+              <RichText text={item} />
+            </li>
+          ))}
+        </ul>
+      )
+
+    case 'table':
+      return (
+        // Таблица примархов — двадцать строк и четыре колонки; на узком
+        // экране она прокручивается внутри себя, а не растягивает страницу.
+        <div className="blk-table-wrap" tabIndex={0} role="region" aria-label="Таблица">
+          <table className="blk-table">
+            <thead>
+              <tr>
+                {block.head.map((h, i) => (
+                  <th key={i} scope="col">
+                    <RichText text={h} />
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {block.rows.map((row, i) => (
+                <tr key={i}>
+                  {row.map((cell, j) => (
+                    <td key={j}>
+                      <RichText text={cell} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+
+    case 'quote':
+      return (
+        <blockquote className="blk-quote">
+          <RichText text={block.text} />
+        </blockquote>
+      )
+
+    case 'disputed':
+      return (
+        <aside className="blk-disputed">
+          <p className="blk-disputed__tag">спорно</p>
+          <p>
+            <RichText text={block.text} />
+          </p>
+        </aside>
+      )
+  }
+}
+
+function InlineImage({ image }: { image: SectionImage }) {
+  return (
+    <motion.figure
+      className="blk-figure"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-10% 0px' }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+    >
+      <img
+        src={image.src}
+        alt={image.alt}
+        width={image.width}
+        height={image.height}
+        loading="lazy"
+        decoding="async"
+        referrerPolicy="no-referrer"
+      />
+      <figcaption>{image.caption}</figcaption>
+    </motion.figure>
+  )
+}
+
+/**
+ * Раскладывает блоки раздела и вплетает картинки после подзаголовков,
+ * к которым они привязаны в images.ts. Несколько картинок на один
+ * подзаголовок встают парами в сетку.
+ */
+export function Blocks({ blocks, images }: { blocks: Block[]; images: SectionImage[] }) {
+  const byHeading = new Map<number, SectionImage[]>()
+  const trailing: SectionImage[] = []
+
+  for (const img of images) {
+    if (img.role !== 'inline') continue
+    if (img.afterHeading === undefined) trailing.push(img)
+    else {
+      const list = byHeading.get(img.afterHeading) ?? []
+      list.push(img)
+      byHeading.set(img.afterHeading, list)
+    }
+  }
+
+  let headingIndex = -1
+  const out: React.ReactNode[] = []
+
+  blocks.forEach((block, i) => {
+    out.push(<BlockView key={`b${i}`} block={block} />)
+
+    if (block.type === 'heading') {
+      headingIndex += 1
+      const pics = byHeading.get(headingIndex)
+      if (pics?.length) {
+        out.push(
+          <div
+            key={`img${i}`}
+            className={`blk-figures${pics.length > 1 ? ' blk-figures--pair' : ''}`}
+          >
+            {pics.map((p) => (
+              <InlineImage key={p.src} image={p} />
+            ))}
+          </div>,
+        )
+      }
+    }
+  })
+
+  if (trailing.length) {
+    out.push(
+      <div
+        key="img-tail"
+        className={`blk-figures${trailing.length > 1 ? ' blk-figures--pair' : ''}`}
+      >
+        {trailing.map((p) => (
+          <InlineImage key={p.src} image={p} />
+        ))}
+      </div>,
+    )
+  }
+
+  return <div className="blocks">{out}</div>
+}

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Rail } from './components/Rail'
-import { SectionShell } from './components/SectionShell'
+import { SectionView } from './components/SectionView'
 import { useScrollProgress } from './hooks/useScrollProgress'
 import { useScrollSpy } from './hooks/useScrollSpy'
 import { epigraph, sections } from './data'
@@ -41,7 +41,7 @@ export default function App() {
         </header>
 
         {sections.map((s) => (
-          <SectionShell key={s.id} section={s} />
+          <SectionView key={s.id} section={s} />
         ))}
 
         <footer className="outro">
