@@ -31,7 +31,12 @@
   /* Размеры */
   --rail-w: 68px;
   --rail-w-open: 320px;
-  --content-max: 76ch;
+  /*
+   * Ширина колонки текста в символах. Растёт вместе с кеглем (см. body),
+   * поэтому на большом мониторе колонка становится физически шире, а число
+   * символов в строке остаётся читаемым.
+   */
+  --content-max: 88ch;
 
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -61,7 +66,12 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 17px;
+  /*
+   * Кегль растёт с шириной экрана: 17px на ноутбуке, 20px на большом
+   * мониторе. Так широкий экран заполняется увеличением всего макета,
+   * а не растягиванием строки до нечитаемой длины.
+   */
+  font-size: clamp(17px, 0.95rem + 0.25vw, 20px);
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

@@ -187,14 +187,8 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
 }
 
-.blk-figure img {
-  width: 100%;
-  height: auto;
+.blk-figure .zoom img {
   aspect-ratio: 16 / 9;
-  object-fit: cover;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  filter: saturate(0.85) contrast(1.05);
 }
 
 .blk-figure figcaption {
