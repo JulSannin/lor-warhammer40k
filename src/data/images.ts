@@ -1,9 +1,14 @@
 import type { SectionImage } from './types'
 
 /**
- * Изображения подгружаются по прямым ссылкам с warhammer40k.fandom.com.
- * CDN отдаёт их с Access-Control-Allow-Origin: * и сам конвертирует в WebP.
- * Каждая ссылка проверена на HTTP 200 при кросс-доменном Referer.
+ * Изображения лежат в public/img и отдаются вместе с сайтом. Раньше они
+ * тянулись напрямую с CDN Fandom, но при прокрутке это давало рывки:
+ * запрос уходил только когда кадр подходил к экрану, и на чужой сети
+ * ответ приходил с заметной задержкой.
+ *
+ * Поле remote — исходная ссылка, по которой файл был получен. По ней же
+ * работает scripts/fetch-images.mjs (npm run images): скрипт докачивает
+ * недостающие файлы, ничего не трогая у уже скачанных.
  *
  * Все изображения — собственность Games Workshop Ltd.
  * Некоммерческое фанатское использование.
@@ -11,7 +16,8 @@ import type { SectionImage } from './types'
 export const images: Record<string, SectionImage[]> = {
   'war-in-heaven': [
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/6/65/Szarekh2.jpg/revision/latest/scale-to-width-down/1920?cb=20250131185606',
+      src: './img/szarekh2.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/6/65/Szarekh2.jpg/revision/latest/scale-to-width-down/1600?cb=20250131185606',
       alt: 'Безмолвный Царь некронов',
       caption: 'Безмолвный Царь — тот, кто разбил К’тан и увёл свой народ в стазис',
       role: 'hero',
@@ -19,7 +25,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 1128,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/9/93/Nightbringer_vs._Deathwatch.jpg/revision/latest/scale-to-width-down/1280?cb=20130203215343',
+      src: './img/nightbringer-vs-deathwatch.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/9/93/Nightbringer_vs._Deathwatch.jpg/revision/latest/scale-to-width-down/1600?cb=20130203215343',
       alt: 'Ночной Странник',
       caption: 'Ночной Странник — один из К’тан, Звёздных богов',
       role: 'inline',
@@ -28,7 +35,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 714,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/6/6c/Warp_Gate.jpg/revision/latest/scale-to-width-down/1280?cb=20151101182120',
+      src: './img/warp-gate.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/6/6c/Warp_Gate.jpg/revision/latest/scale-to-width-down/1600?cb=20151101182120',
       alt: 'Врата Паутины',
       caption: 'Паутина — сеть тоннелей вне реального пространства, наследие Древних',
       role: 'inline',
@@ -39,7 +47,8 @@ export const images: Record<string, SectionImage[]> = {
   ],
   'eldar-fall': [
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/b/bf/AspectWarriors2.jpg/revision/latest/scale-to-width-down/1920?cb=20200911172301',
+      src: './img/aspectwarriors2.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/b/bf/AspectWarriors2.jpg/revision/latest/scale-to-width-down/1600?cb=20200911172301',
       alt: 'Аспектные Воины эльдар',
       caption: 'Путь Воина — дисциплина, которой кораблемиры удерживают себя от повторения Падения',
       role: 'hero',
@@ -47,7 +56,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 2160,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/1/11/Iyanden.jpg/revision/latest/scale-to-width-down/1280?cb=20150317235539',
+      src: './img/iyanden.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/1/11/Iyanden.jpg/revision/latest/scale-to-width-down/1600?cb=20150317235539',
       alt: 'Кораблемир Иянден',
       caption: 'Иянден — один из кораблей-континентов, ушедших до Падения',
       role: 'inline',
@@ -56,7 +66,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 682,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/8/84/PortofLostSouls.jpg/revision/latest/scale-to-width-down/1280?cb=20170523002749',
+      src: './img/portoflostsouls.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/8/84/PortofLostSouls.jpg/revision/latest/scale-to-width-down/1600?cb=20170523002749',
       alt: 'Коморра',
       caption: 'Коморра — город друкари внутри Паутины',
       role: 'inline',
@@ -67,7 +78,8 @@ export const images: Record<string, SectionImage[]> = {
   ],
   'pre-imperium': [
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/3/36/Waves_of_the_Warp.jpg/revision/latest/scale-to-width-down/1920?cb=20160211182552',
+      src: './img/waves-of-the-warp.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/3/36/Waves_of_the_Warp.jpg/revision/latest/scale-to-width-down/1600?cb=20160211182552',
       alt: 'Варп-шторм',
       caption: 'Варп взбесился: шторма отрезали миры друг от друга на тысячелетия',
       role: 'hero',
@@ -75,7 +87,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 1200,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/1/15/Witchsight.jpg/revision/latest/scale-to-width-down/1280?cb=20230325173753',
+      src: './img/witchsight.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/1/15/Witchsight.jpg/revision/latest/scale-to-width-down/1600?cb=20230325173753',
       alt: 'Пробуждение псайкера',
       caption: 'Пробуждение псайкера обычно заканчивалось демоническим вторжением',
       role: 'inline',
@@ -86,7 +99,8 @@ export const images: Record<string, SectionImage[]> = {
   ],
   'emperor-crusade': [
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/a/aa/The_Primarchs.jpg/revision/latest/scale-to-width-down/1920?cb=20171210211743',
+      src: './img/the-primarchs.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/a/aa/The_Primarchs.jpg/revision/latest/scale-to-width-down/1600?cb=20171210211743',
       alt: 'Примархи',
       caption: 'Двадцать примархов — и двадцать разных детств на двадцати чужих мирах',
       role: 'hero',
@@ -94,7 +108,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 1080,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/3/3c/Legio_Custodes_Gal_Vorbak.jpg/revision/latest/scale-to-width-down/1280?cb=20141227205416',
+      src: './img/legio-custodes-gal-vorbak.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/3/3c/Legio_Custodes_Gal_Vorbak.jpg/revision/latest/scale-to-width-down/1600?cb=20141227205416',
       alt: 'Легио Кустодес',
       caption: 'Кустодии — те, кто вырезал Громовых Воинов на пиру',
       role: 'inline',
@@ -103,7 +118,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 1440,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/5/54/MalcadorHorusHeresy.jpg/revision/latest/scale-to-width-down/1280?cb=20250926152559',
+      src: './img/malcadorhorusheresy.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/5/54/MalcadorHorusHeresy.jpg/revision/latest/scale-to-width-down/1600?cb=20250926152559',
       alt: 'Малкадор Сигиллит',
       caption: 'Малкадор Сигиллит, Имперский Регент',
       role: 'inline',
@@ -114,7 +130,8 @@ export const images: Record<string, SectionImage[]> = {
   ],
   'horus-heresy': [
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/a/ae/Isstvan_V_Massacre.jpg/revision/latest/scale-to-width-down/1920?cb=20210317123807',
+      src: './img/isstvan-v-massacre.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/a/ae/Isstvan_V_Massacre.jpg/revision/latest/scale-to-width-down/1600?cb=20210317123807',
       alt: 'Резня на площадке высадки',
       caption: 'Изстван V: вторая волна открыла огонь по своим',
       role: 'hero',
@@ -122,7 +139,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 1080,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/8/84/Scouring_of_Prospero2.jpg/revision/latest/scale-to-width-down/1280?cb=20161116084326',
+      src: './img/scouring-of-prospero2.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/8/84/Scouring_of_Prospero2.jpg/revision/latest/scale-to-width-down/1600?cb=20161116084326',
       alt: 'Сожжение Просперо',
       caption: 'Просперо сожгли по приказу, который Хорус подменил в пути',
       role: 'inline',
@@ -131,7 +149,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 1620,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/a/a1/Emp_vs_Horus_Battle_Terra.png/revision/latest/scale-to-width-down/1280?cb=20180616200410',
+      src: './img/emp-vs-horus-battle-terra.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/a/a1/Emp_vs_Horus_Battle_Terra.png/revision/latest/scale-to-width-down/1600?cb=20180616200410',
       alt: 'Император против Хоруса',
       caption: 'Император стёр Хоруса из существования — тело, дух и душу',
       role: 'inline',
@@ -140,7 +159,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 1428,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/b/ba/Golden_ThroneFFG.jpg/revision/latest/scale-to-width-down/1280?cb=20200625210800',
+      src: './img/golden-throneffg.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/b/ba/Golden_ThroneFFG.jpg/revision/latest/scale-to-width-down/1600?cb=20200625210800',
       alt: 'Золотой Трон',
       caption: 'Золотой Трон: ни жив, ни мёртв',
       role: 'inline',
@@ -151,7 +171,8 @@ export const images: Record<string, SectionImage[]> = {
   ],
   'ten-thousand-years': [
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/4/41/2070_catachan.imperial_guard.jpg/revision/latest/scale-to-width-down/1920?cb=20130213065232',
+      src: './img/2070-catachan-imperial-guard.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/4/41/2070_catachan.imperial_guard.jpg/revision/latest/scale-to-width-down/1600?cb=20130213065232',
       alt: 'Астра Милитарум',
       caption: 'Средняя продолжительность жизни имперского гвардейца в бою — минуты',
       role: 'hero',
@@ -161,7 +182,8 @@ export const images: Record<string, SectionImage[]> = {
   ],
   'chaos': [
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/b/bd/Traitors.jpg/revision/latest/scale-to-width-down/1920?cb=20170401145945',
+      src: './img/traitors.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/b/bd/Traitors.jpg/revision/latest/scale-to-width-down/1600?cb=20170401145945',
       alt: 'Космодесант Хаоса',
       caption: 'Предатели, ушедшие в Око Ужаса десять тысяч лет назад',
       role: 'hero',
@@ -169,7 +191,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 1440,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/c/c4/Khorne_by_alexboca.jpg/revision/latest/scale-to-width-down/1280?cb=20140603022205',
+      src: './img/khorne-by-alexboca.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/c/c4/Khorne_by_alexboca.jpg/revision/latest/scale-to-width-down/1600?cb=20140603022205',
       alt: 'Кхорн',
       caption: 'Кхорн — Бог Крови',
       role: 'inline',
@@ -178,7 +201,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 811,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/9/92/Daemon_Primarch_Mortarion_Closeup_Igor_Sid.png/revision/latest/scale-to-width-down/1280?cb=20190321163348',
+      src: './img/daemon-primarch-mortarion-closeup-igor-sid.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/9/92/Daemon_Primarch_Mortarion_Closeup_Igor_Sid.png/revision/latest/scale-to-width-down/1600?cb=20190321163348',
       alt: 'Мортарион',
       caption: 'Нургл — Дедушка Чума',
       role: 'inline',
@@ -187,7 +211,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 882,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/6/6d/937084-tzeentchspawn.jpg/revision/latest/scale-to-width-down/1280?cb=20111021201940',
+      src: './img/937084-tzeentchspawn.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/6/6d/937084-tzeentchspawn.jpg/revision/latest/scale-to-width-down/1600?cb=20111021201940',
       alt: 'Отродье Тзинча',
       caption: 'Тзинч — Изменяющий Пути',
       role: 'inline',
@@ -196,7 +221,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 2376,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/d/dc/N%27KariTotalWarWarhammerIII.webp/revision/latest/scale-to-width-down/1280?cb=20240913160419',
+      src: './img/nkaritotalwarwarhammeriii.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/d/dc/N%27KariTotalWarWarhammerIII.webp/revision/latest/scale-to-width-down/1600?cb=20240913160419',
       alt: 'Хранитель Секретов',
       caption: 'Слаанеш — Тёмный Принц',
       role: 'inline',
@@ -205,7 +231,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 2158,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/e/ea/BlackCrusades3.jpg/revision/latest/scale-to-width-down/1280?cb=20130831031102',
+      src: './img/blackcrusades3.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/e/ea/BlackCrusades3.jpg/revision/latest/scale-to-width-down/1600?cb=20130831031102',
       alt: 'Чёрный Крестовый Поход',
       caption: 'Тринадцать Чёрных Крестовых Походов Абаддона',
       role: 'inline',
@@ -215,7 +242,8 @@ export const images: Record<string, SectionImage[]> = {
   ],
   'xenos': [
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/9/9e/OrkArmyArmageddon.jpg/revision/latest/scale-to-width-down/1920?cb=20260330004144',
+      src: './img/orkarmyarmageddon.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/9/9e/OrkArmyArmageddon.jpg/revision/latest/scale-to-width-down/1600?cb=20260330004144',
       alt: 'Орочий ВААААГХ!',
       caption: 'ВААААГХ! — религия, миграция и волна разрушения одновременно',
       role: 'hero',
@@ -223,7 +251,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 1071,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/1/18/Gork_%26_Mork.png/revision/latest/scale-to-width-down/1280?cb=20140716063515',
+      src: './img/gork-mork.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/1/18/Gork_%26_Mork.png/revision/latest/scale-to-width-down/1600?cb=20140716063515',
       alt: 'Горк и Морк',
       caption: 'Горк — брутально хитрый, Морк — хитро брутальный',
       role: 'inline',
@@ -232,7 +261,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 766,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/7/75/TyranidsvChaos.jpg/revision/latest/scale-to-width-down/1280?cb=20191011182202',
+      src: './img/tyranidsvchaos.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/7/75/TyranidsvChaos.jpg/revision/latest/scale-to-width-down/1600?cb=20191011182202',
       alt: 'Тираниды',
       caption: 'Тираниды — не завоеватели, а пищеварительная система',
       role: 'inline',
@@ -241,7 +271,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 906,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/3/33/Necron_Warriors_vs_UM.png/revision/latest/scale-to-width-down/1280?cb=20160811061758',
+      src: './img/necron-warriors-vs-um.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/3/33/Necron_Warriors_vs_UM.png/revision/latest/scale-to-width-down/1600?cb=20160811061758',
       alt: 'Некроны',
       caption: 'Гробницы открываются по всей галактике',
       role: 'inline',
@@ -250,7 +281,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 828,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/8/83/Fire_Caste.jpg/revision/latest/scale-to-width-down/1280?cb=20170718165335',
+      src: './img/fire-caste.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/8/83/Fire_Caste.jpg/revision/latest/scale-to-width-down/1600?cb=20170718165335',
       alt: 'Каста Огня Т’ау',
       caption: 'Каста Огня — воины Высшего Блага',
       role: 'inline',
@@ -261,7 +293,8 @@ export const images: Record<string, SectionImage[]> = {
   ],
   'indomitus': [
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/2/2d/The_War_for_Cadia.jpeg/revision/latest/scale-to-width-down/1920?cb=20170128205609',
+      src: './img/the-war-for-cadia.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/2/2d/The_War_for_Cadia.jpeg/revision/latest/scale-to-width-down/1600?cb=20170128205609',
       alt: 'Война за Кадию',
       caption: 'Кадия сломалась, но она не согнулась',
       role: 'hero',
@@ -269,7 +302,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 1570,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/5/57/Primaris_Astartes_Mars.png/revision/latest/scale-to-width-down/1280?cb=20170515202629',
+      src: './img/primaris-astartes-mars.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/5/57/Primaris_Astartes_Mars.png/revision/latest/scale-to-width-down/1600?cb=20170515202629',
       alt: 'Примарис-космодесантники',
       caption: 'Примарис — итог десяти тысяч лет тайной работы Белизария Каула',
       role: 'inline',
@@ -278,7 +312,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 866,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/9/96/GuillimanEraIndomirus.jpg/revision/latest/scale-to-width-down/1280?cb=20230324140231',
+      src: './img/guillimaneraindomirus.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/9/96/GuillimanEraIndomirus.jpg/revision/latest/scale-to-width-down/1600?cb=20230324140231',
       alt: 'Робаут Жиллиман',
       caption: 'Жиллиман вышел из Тронного Зала изменившимся',
       role: 'inline',
@@ -287,7 +322,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 1155,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/7/77/Plague_Wars_Official_Art.jpeg/revision/latest/scale-to-width-down/1280?cb=20230705140611',
+      src: './img/plague-wars-official-art.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/7/77/Plague_Wars_Official_Art.jpeg/revision/latest/scale-to-width-down/1600?cb=20230705140611',
       alt: 'Чумные Войны',
       caption: 'Мортарион лично вторгся в Ультрамар',
       role: 'inline',
@@ -296,7 +332,8 @@ export const images: Record<string, SectionImage[]> = {
       height: 2048,
     },
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/f/f9/TheLionVersusAngron.jpg/revision/latest/scale-to-width-down/1280?cb=20230324162050',
+      src: './img/thelionversusangron.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/f/f9/TheLionVersusAngron.jpg/revision/latest/scale-to-width-down/1600?cb=20230324162050',
       alt: 'Лев против Ангрона',
       caption: 'Лев Эль’Джонсон вернулся после десяти тысяч лет',
       role: 'inline',
@@ -307,7 +344,8 @@ export const images: Record<string, SectionImage[]> = {
   ],
   'thesis': [
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/0/0c/Emperors_Thirst.png/revision/latest/scale-to-width-down/1920?cb=20130417202128',
+      src: './img/emperors-thirst.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/0/0c/Emperors_Thirst.png/revision/latest/scale-to-width-down/1600?cb=20130417202128',
       alt: 'Псайкеров ведут к Золотому Трону',
       caption: 'Тысяча псайкеров в день — только чтобы корабли могли летать',
       role: 'hero',
@@ -317,7 +355,8 @@ export const images: Record<string, SectionImage[]> = {
   ],
   'disputed': [
     {
-      src: 'https://static.wikia.nocookie.net/warhammer40k/images/3/3f/Emperor_VS_Horus.jpg/revision/latest/scale-to-width-down/1920?cb=20120414071343',
+      src: './img/emperor-vs-horus.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/3/3f/Emperor_VS_Horus.jpg/revision/latest/scale-to-width-down/1600?cb=20120414071343',
       alt: 'Император, Хорус и павший защитник',
       caption: 'Кем был защитник у ног Хоруса — лор менял ответ трижды',
       role: 'hero',

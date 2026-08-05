@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { motion } from 'motion/react'
 import type { Section } from '../data/types'
 import { Blocks } from './Blocks'
@@ -9,7 +10,14 @@ import './SectionView.css'
 const sameDates = (a: string, b: string) =>
   a.replace(/[()\s]/g, '') === b.replace(/[()\s]/g, '')
 
-export function SectionView({ section }: { section: Section }) {
+/*
+ * Обёрнут в memo не ради красоты: виртуализатор обновляет своё состояние
+ * на каждом кадре прокрутки, из-за чего перерисовывался App, а вместе с
+ * ним React заново сверял дерево всех смонтированных разделов — а это
+ * полторы тысячи узлов. Раздел зависит только от своих данных, ссылка на
+ * которые постоянна, поэтому memo обрывает эту работу целиком.
+ */
+export const SectionView = memo(function SectionView({ section }: { section: Section }) {
   // Датировка из markdown у всех разделов, где она есть, дословно повторяет
   // эпоху в шапке — показываем её, только если она добавляет что-то новое.
   const subtitle =
@@ -66,4 +74,4 @@ export function SectionView({ section }: { section: Section }) {
       </div>
     </section>
   )
-}
+})
