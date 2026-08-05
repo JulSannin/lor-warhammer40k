@@ -1,0 +1,7 @@
+# В репозитории всегда LF, в рабочей копии — как принято в ОС.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.webp binary
+*.woff2 binary
