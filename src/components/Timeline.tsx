@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { memo } from 'react'
 import type { TimelineEvent } from '../data/types'
 import './Timeline.css'
 
@@ -9,7 +9,13 @@ import './Timeline.css'
  * событий даты совпадают (три эпизода 999.М41), и только авторский
  * порядок отражает, что за чем следовало.
  */
-export function Timeline({ events, label }: { events: TimelineEvent[]; label: string }) {
+export const Timeline = memo(function Timeline({
+  events,
+  label,
+}: {
+  events: TimelineEvent[]
+  label: string
+}) {
   if (events.length === 0) return null
 
   return (
@@ -21,13 +27,13 @@ export function Timeline({ events, label }: { events: TimelineEvent[]; label: st
 
       <ol className="tl__list">
         {events.map((e, i) => (
-          <motion.li
+          <li
             key={`${e.year}-${e.title}`}
             className={`tl__item${e.major ? ' is-major' : ''}`}
-            initial={{ opacity: 0, x: -12 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: '-8% 0px' }}
-            transition={{ duration: 0.4, delay: Math.min(i * 0.05, 0.3), ease: 'easeOut' }}
+            // Появление сделано на CSS: раздел монтируется прямо перед
+            // выходом на экран, и наблюдатель на каждом событии ленты
+            // только добавлял работу на кадре монтирования
+            style={{ '--delay': `${Math.min(i * 0.05, 0.3)}s` } as React.CSSProperties}
           >
             <time className="tl__date">{e.date}</time>
             <span className="tl__dot" aria-hidden="true" />
@@ -35,9 +41,9 @@ export function Timeline({ events, label }: { events: TimelineEvent[]; label: st
               <h4 className="tl__event">{e.title}</h4>
               <p className="tl__summary">{e.summary}</p>
             </div>
-          </motion.li>
+          </li>
         ))}
       </ol>
     </section>
   )
-}
+})

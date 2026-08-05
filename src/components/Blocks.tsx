@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { memo } from 'react'
 import type { Block, SectionImage } from '../data/types'
 import { ZoomableImage } from './Lightbox'
 import { RichText } from './RichText'
@@ -90,16 +90,12 @@ function BlockView({ block }: { block: Block }) {
 
 function InlineImage({ image }: { image: SectionImage }) {
   return (
-    <motion.figure
-      className="blk-figure"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-10% 0px' }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-    >
+    // Появление на CSS, а не на motion: наблюдателей выходило до шести
+    // на раздел, и вся эта работа приходилась на кадр его монтирования
+    <figure className="blk-figure">
       <ZoomableImage image={image} />
       <figcaption>{image.caption}</figcaption>
-    </motion.figure>
+    </figure>
   )
 }
 
@@ -108,7 +104,13 @@ function InlineImage({ image }: { image: SectionImage }) {
  * к которым они привязаны в images.ts. Несколько картинок на один
  * подзаголовок встают парами в сетку.
  */
-export function Blocks({ blocks, images }: { blocks: Block[]; images: SectionImage[] }) {
+export const Blocks = memo(function Blocks({
+  blocks,
+  images,
+}: {
+  blocks: Block[]
+  images: SectionImage[]
+}) {
   const byHeading = new Map<number, SectionImage[]>()
   const trailing: SectionImage[] = []
 
@@ -160,4 +162,4 @@ export function Blocks({ blocks, images }: { blocks: Block[]; images: SectionIma
   }
 
   return <div className="blocks">{out}</div>
-}
+})

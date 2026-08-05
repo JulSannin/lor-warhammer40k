@@ -7,18 +7,12 @@ import 'react-loading-skeleton/dist/skeleton.css'
 import './Lightbox.css'
 
 /**
- * Fandom отдаёт уменьшенные копии по ширине в самом URL. В попапе
- * запрашиваем 2560px: CDN не растягивает — если оригинал меньше,
- * вернётся оригинал.
- */
-function fullSize(src: string): string {
-  return src.replace(/\/scale-to-width-down\/\d+/, '/scale-to-width-down/2560')
-}
-
-/**
- * Кадр в попапе. Копия шириной 2560px весит заметно больше той, что стоит
- * на странице, поэтому пока она едет, показываем уменьшенную версию под
- * скелетоном — читатель сразу видит, что открылось, а не пустой экран.
+ * Кадр в попапе.
+ *
+ * Файл тот же, что и на странице, — скачан шириной 1600px, чего хватает
+ * обоим. Скелетон всё равно нужен: на странице кадр обрезан по пропорции
+ * и показан уменьшенным, а в попапе браузер декодирует картинку целиком,
+ * и на слабой машине это занимает заметное время.
  */
 function LightboxImage({ image }: { image: SectionImage }) {
   const [loaded, setLoaded] = useState(false)
@@ -34,9 +28,8 @@ function LightboxImage({ image }: { image: SectionImage }) {
         </span>
       )}
       <img
-        src={fullSize(image.src)}
+        src={image.src}
         alt={image.alt}
-        referrerPolicy="no-referrer"
         decoding="async"
         onLoad={() => setLoaded(true)}
         onError={() => setLoaded(true)}

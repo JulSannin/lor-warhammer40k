@@ -187,6 +187,27 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
 }
 
+.blk-figure {
+  animation: blk-fig-in 0.5s var(--ease) both;
+}
+
+@keyframes blk-fig-in {
+  from {
+    opacity: 0;
+    translate: 0 20px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blk-figure {
+    animation: none;
+  }
+}
+
 .blk-figure .zoom img {
   aspect-ratio: 16 / 9;
 }

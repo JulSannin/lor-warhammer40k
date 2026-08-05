@@ -72,7 +72,10 @@ export interface TimelineEvent {
 }
 
 export interface SectionImage {
+  /** Путь к локальной копии в public/img. */
   src: string
+  /** Ссылка на исходник, по которой файл скачан. Нужна scripts/fetch-images.mjs. */
+  remote: string
   alt: string
   caption: string
   /** `hero` — крупный кадр в шапке раздела, `inline` — по ходу текста. */

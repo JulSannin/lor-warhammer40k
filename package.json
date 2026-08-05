@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "content": "node scripts/build-content.mjs",
+    "images": "node --experimental-strip-types scripts/fetch-images.mjs",
     "predev": "npm run content",
     "dev": "vite",
     "prebuild": "npm run content",
