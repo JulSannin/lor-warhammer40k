@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-export interface LightboxApi {
+interface LightboxApi {
   /** Открыть попап на картинке с этим `src`. */
   open: (src: string) => void
 }

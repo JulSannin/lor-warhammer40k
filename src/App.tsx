@@ -65,27 +65,58 @@ export default function App() {
     return Math.min(1, Math.max(0, (virtualizer.scrollOffset ?? 0) / scrollable))
   }, [virtualizer.scrollOffset, totalSize, listTop])
 
-  /** Перейти к разделу, не оставляя якорь в адресной строке. */
+  /**
+   * Перейти к разделу, не оставляя якорь в адресной строке.
+   *
+   * Одного вызова мало. Высоты разделов известны заранее только для
+   * ширины, на которой их замеряли; на другой ширине оценки расходятся
+   * с настоящими размерами, и позиция цели уезжает, пока виртуализатор
+   * домеряет разделы выше неё. Поэтому доводим кадр до цели, пока она не
+   * перестанет двигаться, и останавливаемся, если читатель начал крутить
+   * страницу сам — навязывать ему позицию нельзя.
+   */
   const goTo = useCallback(
     (index: number) => {
       if (index < 0 || index >= sections.length) return
       virtualizer.scrollToIndex(index, { align: 'start' })
-      // Виртуализатор может промахнуться, пока не измерил реальные высоты
-      // разделов выше цели, — повторяем, пока позиция не устоится
-      let tries = 0
-      const retry = () => {
-        if (tries++ > 12) return
+
+      let raf = 0
+      let stopped = false
+      let steady = 0
+      const deadline = performance.now() + 2500
+
+      const stop = () => {
+        stopped = true
+        cancelAnimationFrame(raf)
+        window.removeEventListener('wheel', stop)
+        window.removeEventListener('touchstart', stop)
+        window.removeEventListener('keydown', stop)
+      }
+
+      const settle = () => {
+        if (stopped) return
+        if (performance.now() > deadline) return stop()
+
         const el = document.getElementById(sections[index].id)
         if (!el) {
+          // Раздел ещё не построен — просим виртуализатор ещё раз
           virtualizer.scrollToIndex(index, { align: 'start' })
+          steady = 0
         } else if (Math.abs(el.getBoundingClientRect().top) > 4) {
           el.scrollIntoView({ behavior: 'instant', block: 'start' })
+          steady = 0
         } else {
-          return
+          steady += 1
         }
-        requestAnimationFrame(retry)
+
+        if (steady < 5) raf = requestAnimationFrame(settle)
+        else stop()
       }
-      requestAnimationFrame(retry)
+
+      window.addEventListener('wheel', stop, { passive: true, once: true })
+      window.addEventListener('touchstart', stop, { passive: true, once: true })
+      window.addEventListener('keydown', stop, { once: true })
+      raf = requestAnimationFrame(settle)
     },
     [virtualizer],
   )

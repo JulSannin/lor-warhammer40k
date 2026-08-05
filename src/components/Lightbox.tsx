@@ -142,18 +142,6 @@ export function LightboxProvider({
             <span className="visually-hidden">Закрыть</span>
           </button>
 
-          {images.length > 1 && (
-            <button
-              type="button"
-              className="lb__nav lb__nav--prev"
-              onClick={() => step(-1)}
-              data-focusable
-            >
-              <span aria-hidden="true">‹</span>
-              <span className="visually-hidden">Предыдущее изображение</span>
-            </button>
-          )}
-
           <figure className="lb__figure" key={current.src}>
             <LightboxImage image={current} />
             <figcaption>
@@ -164,16 +152,34 @@ export function LightboxProvider({
             </figcaption>
           </figure>
 
+          {/*
+            Кнопки листания живут одним рядом сразу под подписью. На широком
+            экране CSS разносит их по краям кадра (display: contents у ряда),
+            на узком они остаются рядом с картинкой. Раньше они позиционировались
+            от окна и на телефоне уезжали в самый низ экрана, далеко от кадра, —
+            левую кнопку там было просто не найти.
+          */}
           {images.length > 1 && (
-            <button
-              type="button"
-              className="lb__nav lb__nav--next"
-              onClick={() => step(1)}
-              data-focusable
-            >
-              <span aria-hidden="true">›</span>
-              <span className="visually-hidden">Следующее изображение</span>
-            </button>
+            <div className="lb__controls">
+              <button
+                type="button"
+                className="lb__nav lb__nav--prev"
+                onClick={() => step(-1)}
+                data-focusable
+              >
+                <span aria-hidden="true">‹</span>
+                <span className="visually-hidden">Предыдущее изображение</span>
+              </button>
+              <button
+                type="button"
+                className="lb__nav lb__nav--next"
+                onClick={() => step(1)}
+                data-focusable
+              >
+                <span aria-hidden="true">›</span>
+                <span className="visually-hidden">Следующее изображение</span>
+              </button>
+            </div>
           )}
         </div>
       )}

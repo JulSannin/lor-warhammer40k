@@ -1,7 +1,7 @@
 import generated from './content.generated.json' with { type: 'json' }
 import { meta } from './meta'
 import { images } from './images'
-import type { GeneratedContent, Section, SectionImage, TimelineEvent } from './types'
+import type { GeneratedContent, Section, SectionImage } from './types'
 
 // JSON-импорт даёт `type: string` вместо литеральных типов блоков, поэтому
 // прямое приведение TypeScript отвергает. Форму гарантирует генератор
@@ -36,7 +36,6 @@ function assemble(): Section[] {
 
 export const sections: Section[] = assemble()
 
-export const docTitle = content.docTitle
 export const epigraph = content.epigraph
 
 /**
@@ -120,16 +119,3 @@ function guessHeight(section: Section): number {
 }
 
 export const sectionHeights: number[] = sections.map((s) => MEASURED[s.id] ?? guessHeight(s))
-
-/** Раздел по короткому id или по якорю из markdown. */
-export function findSection(key: string): Section | undefined {
-  const needle = decodeURIComponent(key).replace(/^#/, '')
-  return sections.find((s) => s.id === needle || s.anchor === needle)
-}
-
-/** Сквозная лента: все датированные события всех разделов по возрастанию. */
-export const globalTimeline: (TimelineEvent & { sectionId: string })[] = sections
-  .flatMap((s) => s.events.map((e) => ({ ...e, sectionId: s.id })))
-  .sort((a, b) => a.year - b.year)
-
-export type { Section, TimelineEvent } from './types'
