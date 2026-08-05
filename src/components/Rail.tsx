@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from 'react'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import type { Section } from '../data/types'
 import './Rail.css'
 
@@ -29,17 +30,16 @@ export function Rail({ sections, activeId, progress, pinned, onPinnedChange }: R
   const [mobileOpen, setMobileOpen] = useState(false)
   const panelId = useId()
 
-  const open = pinned || hovered || mobileOpen
-  const activeEra = sections.find((s) => s.id === activeId)?.era ?? null
-
   /*
    * Раскрытие наведением — только там, где есть мышь. На тач-устройстве
    * касание тоже присылает mouseenter, и состояние наведения зависало:
    * панель не закрывалась после выбора раздела, потому что «курсор» с неё
    * формально так и не ушёл.
    */
-  const canHover = () =>
-    typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches
+  const touch = !useMediaQuery('(hover: hover)')
+
+  const open = pinned || hovered || mobileOpen
+  const activeEra = sections.find((s) => s.id === activeId)?.era ?? null
 
   // Escape закрывает панель — и раскрытую наведением, и закреплённую.
   useEffect(() => {
@@ -80,16 +80,18 @@ export function Rail({ sections, activeId, progress, pinned, onPinnedChange }: R
       <nav
         className={`rail${open ? ' rail--open' : ''}`}
         aria-label="Разделы"
-        onMouseEnter={() => canHover() && setHovered(true)}
+        onMouseEnter={() => !touch && setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
         {/*
-          Свёрнутая полоса — только индикатор: номер текущей части и доля
-          прочитанного. Кликать по ней нельзя, иначе после закрытия панели
-          курсор остаётся над полосой и попадает по цифре, которая оказалась
-          под ним случайно. Переходы делаются из раскрытой панели.
+          Свёрнутая полоса. С мышью — только индикатор: клики по ней не
+          принимаются, иначе после закрытия панели курсор остаётся над
+          полосой и попадает по цифре, оказавшейся под ним случайно.
+          На тач-устройстве наведения нет и панель сама не раскроется,
+          поэтому там метки становятся ссылками — и полоса перестаёт быть
+          скрытой от скринридера.
         */}
-        <div className="rail__strip" aria-hidden="true">
+        <div className="rail__strip" aria-hidden={touch ? undefined : 'true'}>
           {/* Единственная точка входа с клавиатуры и с тача */}
           <button
             type="button"
@@ -104,16 +106,27 @@ export function Rail({ sections, activeId, progress, pinned, onPinnedChange }: R
           </button>
 
           <ul className="rail__marks">
-            {sections.map((s) => (
-              <li key={s.id}>
-                <span
-                  className={`rail__mark${s.id === activeId ? ' is-active' : ''}`}
-                  style={{ '--accent': s.accent } as React.CSSProperties}
-                >
-                  {railMark(s)}
-                </span>
-              </li>
-            ))}
+            {sections.map((s) => {
+              const cls = `rail__mark${s.id === activeId ? ' is-active' : ''}`
+              const style = { '--accent': s.accent } as React.CSSProperties
+              // На тач-устройстве метка — ссылка: наведения там нет, и панель
+              // сама не раскроется. С мышью она остаётся индикатором, иначе
+              // после закрытия панели курсор попадает по случайной цифре.
+              return (
+                <li key={s.id}>
+                  {touch ? (
+                    <a href={`#${s.id}`} className={cls} style={style} title={s.navLabel}>
+                      <span aria-hidden="true">{railMark(s)}</span>
+                      <span className="visually-hidden">{s.navLabel}</span>
+                    </a>
+                  ) : (
+                    <span className={cls} style={style}>
+                      {railMark(s)}
+                    </span>
+                  )}
+                </li>
+              )
+            })}
           </ul>
 
           <div

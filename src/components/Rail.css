@@ -46,7 +46,9 @@
   list-style: none;
 }
 
-/* Индикатор, а не кнопка: клики по свёрнутой полосе не принимаются */
+/* С мышью — индикатор, а не кнопка: клики по свёрнутой полосе не
+   принимаются. На тач-устройстве метка приходит ссылкой (см. Rail.tsx),
+   и правило ниже возвращает ей кликабельность. */
 .rail__mark {
   display: grid;
   place-items: center;
@@ -62,6 +64,15 @@
   transition:
     color 0.2s var(--ease),
     border-color 0.2s var(--ease);
+}
+
+a.rail__mark {
+  pointer-events: auto;
+  text-decoration: none;
+}
+
+a.rail__mark:active {
+  background: var(--surface-2);
 }
 
 .rail__mark.is-active {
@@ -344,16 +355,4 @@
   .rail__scrim {
     display: block;
   }
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
 }

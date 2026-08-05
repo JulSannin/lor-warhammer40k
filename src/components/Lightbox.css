@@ -93,10 +93,13 @@
   inset: 0;
   z-index: 100;
   display: grid;
-  place-items: center;
+  justify-items: center;
+  /* Строки прижаты друг к другу и отцентрованы как группа: иначе кадр
+     и ряд кнопок расходятся по краям экрана */
+  align-content: center;
   padding: clamp(0.5rem, 1.5vw, 1.25rem);
-  background: rgb(4 4 3 / 0.94);
-  backdrop-filter: blur(6px);
+  background: rgb(6 5 4 / 0.97);
+  backdrop-filter: blur(8px);
 }
 
 .lb__figure {
@@ -192,49 +195,69 @@
   border-color: var(--gold-dim);
 }
 
+/* Узкий экран: кнопки рядом друг с другом сразу под подписью */
+.lb__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.1rem;
+}
+
 .lb__nav {
-  position: absolute;
-  top: 50%;
-  translate: 0 -50%;
-  width: 3rem;
-  height: 5rem;
+  width: 4.5rem;
+  height: 3rem;
   display: grid;
   place-items: center;
   font-size: 2rem;
   line-height: 1;
-  color: var(--muted);
-  background: rgb(10 9 8 / 0.55);
-  border: 1px solid transparent;
-  border-radius: 2px;
+  color: var(--bone);
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
   transition:
     color 0.2s var(--ease),
-    background 0.2s var(--ease);
+    background 0.2s var(--ease),
+    border-color 0.2s var(--ease);
 }
 
 .lb__nav:hover {
-  color: var(--bone);
+  color: var(--gold);
   background: var(--surface);
-  border-color: var(--line-strong);
+  border-color: var(--gold-dim);
 }
 
-.lb__nav--prev {
-  left: clamp(0.25rem, 1vw, 1rem);
-}
-
-.lb__nav--next {
-  right: clamp(0.25rem, 1vw, 1rem);
-}
-
-@media (max-width: 640px) {
-  .lb__figure img {
-    max-height: 74vh;
+/*
+ * Широкий экран: ряд перестаёт быть контейнером (display: contents), и
+ * кнопки позиционируются по краям кадра — привычная для галереи схема.
+ */
+@media (min-width: 700px) {
+  .lb__controls {
+    display: contents;
   }
-  /* На узком экране кнопки уходят вниз, чтобы не лежать поверх картинки */
+
   .lb__nav {
-    top: auto;
-    bottom: 0.75rem;
-    translate: none;
-    width: 4rem;
-    height: 3rem;
+    position: absolute;
+    top: 50%;
+    translate: 0 -50%;
+    width: 3rem;
+    height: 5rem;
+    color: var(--muted);
+    background: rgb(10 9 8 / 0.55);
+    border-color: transparent;
+  }
+
+  .lb__nav--prev {
+    left: clamp(0.25rem, 1vw, 1rem);
+  }
+
+  .lb__nav--next {
+    right: clamp(0.25rem, 1vw, 1rem);
+  }
+}
+
+@media (max-width: 699px) {
+  .lb__figure img {
+    max-height: 62vh;
   }
 }

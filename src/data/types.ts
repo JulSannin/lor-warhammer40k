@@ -26,8 +26,6 @@ export type Block =
   /** Абзац, помеченный в исходнике как `**[спорно]**` — лор противоречив. */
   | { type: 'disputed'; text: RichText }
 
-export type BlockType = Block['type']
-
 /** Раздел в том виде, в каком его отдаёт парсер markdown. */
 export interface ParsedSection {
   /** Стабильный латинский идентификатор, например `horus-heresy`. */
