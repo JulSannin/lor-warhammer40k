@@ -3,16 +3,25 @@ import { GlobalTimeline } from './components/GlobalTimeline'
 import { LightboxProvider } from './components/Lightbox'
 import { Rail } from './components/Rail'
 import { SectionView } from './components/SectionView'
-import { useScrollProgress } from './hooks/useScrollProgress'
+import { useProgressiveMount } from './hooks/useProgressiveMount'
+import { useReadingProgress } from './hooks/useReadingProgress'
 import { useScrollSpy } from './hooks/useScrollSpy'
 import { allImages, epigraph, sections } from './data'
 import './App.css'
 
 export default function App() {
   const [pinned, setPinned] = useState(false)
-  const ids = useMemo(() => sections.map((s) => s.id), [])
-  const activeId = useScrollSpy(ids)
-  const progress = useScrollProgress()
+
+  const keys = useMemo(() => sections.map((s) => ({ id: s.id, anchor: s.anchor })), [])
+  const { count, sentinelRef } = useProgressiveMount(keys)
+
+  const visible = useMemo(() => sections.slice(0, count), [count])
+  const visibleIds = useMemo(() => visible.map((s) => s.id), [visible])
+
+  const activeId = useScrollSpy(visibleIds)
+  const progress = useReadingProgress(visibleIds, sections.length)
+
+  const next = sections[count] ?? null
 
   return (
     <LightboxProvider images={allImages}>
@@ -44,16 +53,29 @@ export default function App() {
 
           <GlobalTimeline sections={sections} />
 
-          {sections.map((s) => (
+          {visible.map((s) => (
             <SectionView key={s.id} section={s} />
           ))}
 
-          <footer className="outro">
-            <p>
-              Warhammer 40,000 и все связанные названия, персонажи и изображения —
-              собственность Games Workshop Ltd. Некоммерческий фанатский проект.
-            </p>
-          </footer>
+          {next && (
+            <div className="next" ref={sentinelRef} aria-hidden="true">
+              <span className="next__label">Дальше</span>
+              <span className="next__title">
+                {next.part ? `${next.part}. ` : ''}
+                {next.navLabel}
+              </span>
+              <span className="next__bar" />
+            </div>
+          )}
+
+          {!next && (
+            <footer className="outro">
+              <p>
+                Warhammer 40,000 и все связанные названия, персонажи и изображения —
+                собственность Games Workshop Ltd. Некоммерческий фанатский проект.
+              </p>
+            </footer>
+          )}
         </main>
       </div>
     </LightboxProvider>
