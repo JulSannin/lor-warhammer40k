@@ -4,7 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "content": "node scripts/build-content.mjs",
+    "predev": "npm run content",
     "dev": "vite",
+    "prebuild": "npm run content",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"
