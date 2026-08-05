@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import Skeleton from 'react-loading-skeleton'
 import type { SectionImage } from '../data/types'
 import { LightboxContext, useLightbox } from './lightbox-context'
+import 'react-loading-skeleton/dist/skeleton.css'
 import './Lightbox.css'
 
 /**
@@ -11,6 +13,36 @@ import './Lightbox.css'
  */
 function fullSize(src: string): string {
   return src.replace(/\/scale-to-width-down\/\d+/, '/scale-to-width-down/2560')
+}
+
+/**
+ * Кадр в попапе. Копия шириной 2560px весит заметно больше той, что стоит
+ * на странице, поэтому пока она едет, показываем уменьшенную версию под
+ * скелетоном — читатель сразу видит, что открылось, а не пустой экран.
+ */
+function LightboxImage({ image }: { image: SectionImage }) {
+  const [loaded, setLoaded] = useState(false)
+
+  // Сбрасываем состояние при переходе к соседней картинке
+  useEffect(() => setLoaded(false), [image.src])
+
+  return (
+    <span className={`lb__frame${loaded ? ' is-loaded' : ''}`}>
+      {!loaded && (
+        <span className="lb__skeleton" aria-hidden="true">
+          <Skeleton height="100%" width="100%" borderRadius={0} />
+        </span>
+      )}
+      <img
+        src={fullSize(image.src)}
+        alt={image.alt}
+        referrerPolicy="no-referrer"
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
+      />
+    </span>
+  )
 }
 
 export function LightboxProvider({
@@ -141,12 +173,7 @@ export function LightboxProvider({
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
             >
-              <img
-                src={fullSize(current.src)}
-                alt={current.alt}
-                referrerPolicy="no-referrer"
-                decoding="async"
-              />
+              <LightboxImage image={current} />
               <figcaption>
                 <span className="lb__caption">{current.caption}</span>
                 <span className="lb__counter">
@@ -173,7 +200,14 @@ export function LightboxProvider({
   )
 }
 
-/** Картинка, открывающая попап по клику. Используется и в шапке, и по тексту. */
+/**
+ * Картинка, открывающая попап по клику. Используется и в шапке, и по тексту.
+ *
+ * До загрузки на месте кадра стоит скелетон, а сама картинка проявляется
+ * плавно. Место под кадр зарезервировано пропорцией в CSS, поэтому вёрстка
+ * не прыгает, — но без этого картинки возникали рывком, и на прокрутке это
+ * читалось как дёрганье.
+ */
 export function ZoomableImage({
   image,
   className,
@@ -182,15 +216,28 @@ export function ZoomableImage({
   className?: string
 }) {
   const { open } = useLightbox()
+  const ref = useRef<HTMLImageElement>(null)
+  const [loaded, setLoaded] = useState(false)
+
+  // Картинка из кеша может успеть загрузиться до навешивания onLoad
+  useEffect(() => {
+    if (ref.current?.complete && ref.current.naturalWidth > 0) setLoaded(true)
+  }, [])
 
   return (
     <button
       type="button"
-      className={`zoom${className ? ` ${className}` : ''}`}
+      className={`zoom${className ? ` ${className}` : ''}${loaded ? ' is-loaded' : ''}`}
       onClick={() => open(image.src)}
       aria-label={`Открыть изображение: ${image.alt}`}
     >
+      {!loaded && (
+        <span className="zoom__skeleton" aria-hidden="true">
+          <Skeleton height="100%" width="100%" borderRadius={0} />
+        </span>
+      )}
       <img
+        ref={ref}
         src={image.src}
         alt={image.alt}
         width={image.width}
@@ -198,6 +245,8 @@ export function ZoomableImage({
         loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
       />
       <span className="zoom__hint" aria-hidden="true">
         ⤢

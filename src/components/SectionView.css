@@ -1,7 +1,29 @@
+/*
+ * Фон раздела выводится из его акцентного цвета, поэтому все одиннадцать
+ * отличаются друг от друга, но остаются тёмными: заливка подмешивает
+ * четыре процента акцента к общему фону, свечения — девять и шесть.
+ * Больше брать нельзя, иначе падает контраст текста.
+ */
 .section {
   position: relative;
   padding-block: clamp(4rem, 10vh, 8rem);
+  /* Фон растянут на боковые поля контейнера, иначе полоса обрывается
+     по краям колонки и раздел выглядит карточкой, а не полосой */
+  margin-inline: calc(-1 * var(--gutter));
+  padding-inline: var(--gutter);
   border-top: 1px solid var(--line);
+  background-color: color-mix(in srgb, var(--accent) 4%, var(--bg));
+  background-image:
+    radial-gradient(
+      ellipse 90% 45% at 12% 0%,
+      color-mix(in srgb, var(--accent) 9%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 80% 45% at 88% 100%,
+      color-mix(in srgb, var(--accent) 6%, transparent),
+      transparent 58%
+    );
 }
 
 .section:first-of-type {
