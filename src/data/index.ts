@@ -119,9 +119,7 @@ function guessHeight(section: Section): number {
   return h + 150
 }
 
-export const sectionHeights: number[] = sections.map(
-  (s) => MEASURED[s.id] ?? guessHeight(s),
-)
+export const sectionHeights: number[] = sections.map((s) => MEASURED[s.id] ?? guessHeight(s))
 
 /** Раздел по короткому id или по якорю из markdown. */
 export function findSection(key: string): Section | undefined {

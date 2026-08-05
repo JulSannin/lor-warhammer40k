@@ -206,7 +206,9 @@
   background: rgb(10 9 8 / 0.55);
   border: 1px solid transparent;
   border-radius: 2px;
-  transition: color 0.2s var(--ease), background 0.2s var(--ease);
+  transition:
+    color 0.2s var(--ease),
+    background 0.2s var(--ease);
 }
 
 .lb__nav:hover {

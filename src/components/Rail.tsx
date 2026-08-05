@@ -1,5 +1,4 @@
 import { useEffect, useId, useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
 import type { Section } from '../data/types'
 import './Rail.css'
 
@@ -131,90 +130,82 @@ export function Rail({ sections, activeId, progress, pinned, onPinnedChange }: R
           <span className="rail__percent">{Math.round(progress * 100)}</span>
         </div>
 
-        {/* Раскрытая панель */}
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              id={panelId}
-              className="rail__panel"
-              initial={{ opacity: 0, x: -24 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -24 }}
-              transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+        {/*
+          Панель не размонтируется, а прячется: так работают оба перехода —
+          и появление, и исчезновение — на одном CSS-свойстве, без
+          библиотеки анимаций. В закрытом виде visibility: hidden убирает
+          её ссылки из обхода клавиатурой.
+        */}
+        <div id={panelId} className={`rail__panel${open ? ' is-open' : ''}`}>
+          <div className="rail__panel-head">
+            <p className="rail__panel-title">
+              Краткий лор
+              <br />
+              Warhammer 40K
+            </p>
+            <button
+              type="button"
+              className={`rail__pin${pinned ? ' is-pinned' : ''}`}
+              aria-pressed={pinned}
+              onClick={() => onPinnedChange(!pinned)}
             >
-              <div className="rail__panel-head">
-                <p className="rail__panel-title">
-                  Краткий лор
-                  <br />
-                  Warhammer 40K
-                </p>
-                <button
-                  type="button"
-                  className={`rail__pin${pinned ? ' is-pinned' : ''}`}
-                  aria-pressed={pinned}
-                  onClick={() => onPinnedChange(!pinned)}
-                >
-                  <span aria-hidden="true">{pinned ? '◉' : '○'}</span>
-                  <span className="visually-hidden">
-                    {pinned ? 'Открепить панель' : 'Закрепить панель'}
-                  </span>
-                </button>
-              </div>
+              <span aria-hidden="true">{pinned ? '◉' : '○'}</span>
+              <span className="visually-hidden">
+                {pinned ? 'Открепить панель' : 'Закрепить панель'}
+              </span>
+            </button>
+          </div>
 
-              {/*
+          {/*
                 Компактная шкала «где я во времени». Засечки стоят равномерно,
                 а не по годам: линейная ось растянула бы шестьдесят миллионов
                 лет и схлопнула бы весь Империум в точку. Масштаб несёт подпись.
               */}
-              <div className="rail__axis">
-                <div className="rail__axis-track" aria-hidden="true">
-                  {sections.map((s) => (
-                    <span
-                      key={s.id}
-                      className={
-                        'rail__axis-tick' +
-                        (s.id === activeId ? ' is-active' : '') +
-                        (s.year === null ? ' is-timeless' : '')
-                      }
-                      style={{ '--accent': s.accent } as React.CSSProperties}
-                    />
-                  ))}
-                </div>
-                <p className="rail__axis-caption">
-                  <span>~60 млн до н.э.</span>
-                  <span>М42</span>
-                </p>
-                {activeEra && <p className="rail__axis-now">{activeEra}</p>}
-              </div>
+          <div className="rail__axis">
+            <div className="rail__axis-track" aria-hidden="true">
+              {sections.map((s) => (
+                <span
+                  key={s.id}
+                  className={
+                    'rail__axis-tick' +
+                    (s.id === activeId ? ' is-active' : '') +
+                    (s.year === null ? ' is-timeless' : '')
+                  }
+                  style={{ '--accent': s.accent } as React.CSSProperties}
+                />
+              ))}
+            </div>
+            <p className="rail__axis-caption">
+              <span>~60 млн до н.э.</span>
+              <span>М42</span>
+            </p>
+            {activeEra && <p className="rail__axis-now">{activeEra}</p>}
+          </div>
 
-              <ol className="rail__list">
-                {sections.map((s) => (
-                  <li key={s.id}>
-                    <a
-                      href={`#${s.id}`}
-                      className={`rail__item${s.id === activeId ? ' is-active' : ''}`}
-                      style={{ '--accent': s.accent } as React.CSSProperties}
-                      aria-current={s.id === activeId ? 'true' : undefined}
-                      onClick={go}
-                    >
-                      <span className="rail__item-mark" aria-hidden="true">
-                        {railMark(s)}
-                      </span>
-                      <span className="rail__item-text">
-                        <span className="rail__item-label">{s.navLabel}</span>
-                        <span className="rail__item-era">{s.era}</span>
-                      </span>
-                    </a>
-                  </li>
-                ))}
-              </ol>
+          <ol className="rail__list">
+            {sections.map((s) => (
+              <li key={s.id}>
+                <a
+                  href={`#${s.id}`}
+                  className={`rail__item${s.id === activeId ? ' is-active' : ''}`}
+                  style={{ '--accent': s.accent } as React.CSSProperties}
+                  aria-current={s.id === activeId ? 'true' : undefined}
+                  onClick={go}
+                >
+                  <span className="rail__item-mark" aria-hidden="true">
+                    {railMark(s)}
+                  </span>
+                  <span className="rail__item-text">
+                    <span className="rail__item-label">{s.navLabel}</span>
+                    <span className="rail__item-era">{s.era}</span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ol>
 
-              <p className="rail__hint">
-                {Math.round(progress * 100)}% прочитано
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          <p className="rail__hint">{Math.round(progress * 100)}% прочитано</p>
+        </div>
       </nav>
 
       {mobileOpen && (

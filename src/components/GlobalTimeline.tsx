@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { memo } from 'react'
 import type { Section } from '../data/types'
 import './GlobalTimeline.css'
 
@@ -18,7 +18,11 @@ function mark(section: Section): string {
  * полосами, а масштаб времени несут подписи эпох — и об этом прямо
  * сказано в примечании, чтобы карта никого не вводила в заблуждение.
  */
-export function GlobalTimeline({ sections }: { sections: Section[] }) {
+export const GlobalTimeline = memo(function GlobalTimeline({
+  sections,
+}: {
+  sections: Section[]
+}) {
   const total = sections.reduce((n, s) => n + s.events.length, 0)
 
   return (
@@ -28,25 +32,25 @@ export function GlobalTimeline({ sections }: { sections: Section[] }) {
         <h2 className="gt__title" id="gt-title">
           Хронология
         </h2>
-        <p className="gt__meta">
-          {total} событий · от ~60 000 000 лет до н.э. до М42
-        </p>
+        <p className="gt__meta">{total} событий · от ~60 000 000 лет до н.э. до М42</p>
         <p className="gt__note">
-          Шкала не линейная. Между первой и второй частью — десятки миллионов лет, между
-          пятой и шестой — девять. На честной оси весь Империум схлопнулся бы в точку,
-          поэтому масштаб времени несут подписи эпох, а не расстояние между полосами.
+          Шкала не линейная. Между первой и второй частью — десятки миллионов лет, между пятой и
+          шестой — девять. На честной оси весь Империум схлопнулся бы в точку, поэтому масштаб
+          времени несут подписи эпох, а не расстояние между полосами.
         </p>
       </header>
 
       <ol className="gt__bands">
         {sections.map((s, i) => (
-          <motion.li
+          <li
             key={s.id}
-            style={{ '--accent': s.accent } as React.CSSProperties}
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-5% 0px' }}
-            transition={{ duration: 0.35, delay: Math.min(i * 0.04, 0.35), ease: 'easeOut' }}
+            className="gt__row"
+            style={
+              {
+                '--accent': s.accent,
+                '--delay': `${Math.min(i * 0.04, 0.35)}s`,
+              } as React.CSSProperties
+            }
           >
             <a className={`gt__band${s.year === null ? ' is-timeless' : ''}`} href={`#${s.id}`}>
               <span className="gt__mark" aria-hidden="true">
@@ -79,9 +83,9 @@ export function GlobalTimeline({ sections }: { sections: Section[] }) {
                   : 'Раздел вне хронологии'}
               </span>
             </a>
-          </motion.li>
+          </li>
         ))}
       </ol>
     </section>
   )
-}
+})

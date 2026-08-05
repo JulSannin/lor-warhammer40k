@@ -14,6 +14,26 @@
  * в читаемую длину строки, и расширение контейнера только отодвигало бы
  * кадры от текста. 1680px — предел, на котором кадр 16:7 ещё не выше экрана.
  */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--bone);
+  background: var(--surface);
+  border: 1px solid var(--gold-dim);
+  border-radius: 2px;
+  text-decoration: none;
+  translate: 0 -200%;
+}
+
+.skip-link:focus-visible {
+  translate: 0 0;
+}
+
 .app__content {
   max-width: 1440px;
   margin-inline: auto;
@@ -29,8 +49,7 @@
   flex-direction: column;
   justify-content: center;
   padding-block: 4rem;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, #1c1512 0%, transparent 70%);
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, #1c1512 0%, transparent 70%);
 }
 
 .intro__eyebrow {
@@ -55,7 +74,6 @@
   font-style: italic;
   color: var(--muted);
 }
-
 
 /* ---------------- Виртуализованный список разделов ---------------- */
 

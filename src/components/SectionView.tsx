@@ -1,5 +1,4 @@
 import { memo } from 'react'
-import { motion } from 'motion/react'
 import type { Section } from '../data/types'
 import { Blocks } from './Blocks'
 import { ZoomableImage } from './Lightbox'
@@ -33,13 +32,7 @@ export const SectionView = memo(function SectionView({ section }: { section: Sec
       {/* Псевдоним для якорей вида #часть-v-ересь-хоруса из исходного лора */}
       <span id={section.anchor} className="section__anchor" aria-hidden="true" />
 
-      <motion.header
-        className="section__head"
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-15% 0px -15% 0px' }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
-      >
+      <header className="section__head">
         <p className="section__eyebrow">
           <span className="section__part">{section.part ?? `Раздел ${section.index}`}</span>
           <span className="section__era">{section.era}</span>
@@ -52,19 +45,13 @@ export const SectionView = memo(function SectionView({ section }: { section: Sec
         {subtitle && <p className="section__subtitle">{subtitle}</p>}
 
         <p className="section__lead">{section.lead}</p>
-      </motion.header>
+      </header>
 
       {section.hero && (
-        <motion.figure
-          className="section__hero"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: '-10% 0px' }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-        >
+        <figure className="section__hero">
           <ZoomableImage image={section.hero} />
           <figcaption>{section.hero.caption}</figcaption>
-        </motion.figure>
+        </figure>
       )}
 
       <Timeline events={section.events} label={section.navLabel} />
