@@ -120,9 +120,9 @@ export function Rail({ sections, activeId, progress, pinned, onPinnedChange }: R
             >
               <div className="rail__panel-head">
                 <p className="rail__panel-title">
-                  Весь лор
+                  Краткий лор
                   <br />
-                  Warhammer 40,000
+                  Warhammer 40K
                 </p>
                 <button
                   type="button"

@@ -5,6 +5,7 @@
 
 .gt__head {
   max-width: var(--content-max);
+  margin-inline: auto;
 }
 
 .gt__eyebrow {
