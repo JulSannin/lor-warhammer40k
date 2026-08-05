@@ -142,6 +142,58 @@
   border-color: var(--gold-dim);
 }
 
+/* ---------------- Шкала «где я во времени» ---------------- */
+
+.rail__axis {
+  padding: 1rem 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.rail__axis-track {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 0.9rem;
+}
+
+.rail__axis-tick {
+  flex: 1;
+  height: 3px;
+  background: var(--line-strong);
+  border-radius: 1px;
+  transition: background 0.2s var(--ease), height 0.2s var(--ease);
+}
+
+.rail__axis-tick.is-timeless {
+  background: transparent;
+  border-top: 1px dashed var(--line-strong);
+  height: 0;
+}
+
+.rail__axis-tick.is-active {
+  height: 9px;
+  background: var(--accent);
+  border-top: none;
+}
+
+.rail__axis-caption {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.06em;
+  color: var(--faint);
+}
+
+.rail__axis-now {
+  margin-top: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+}
+
 .rail__list {
   flex: 1;
   margin: 0.75rem 0 0;

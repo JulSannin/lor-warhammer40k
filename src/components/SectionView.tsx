@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import type { Section } from '../data/types'
 import { Blocks } from './Blocks'
+import { Timeline } from './Timeline'
 import './SectionView.css'
 
 /** `(005.М31 — 014.М31)` и `005.М31 — 014.М31` — одно и то же. */
@@ -64,6 +65,8 @@ export function SectionView({ section }: { section: Section }) {
           <figcaption>{section.hero.caption}</figcaption>
         </motion.figure>
       )}
+
+      <Timeline events={section.events} label={section.navLabel} />
 
       <div className="section__body">
         <Blocks blocks={section.blocks} images={section.images} />
