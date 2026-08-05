@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useWindowVirtualizer } from '@tanstack/react-virtual'
+import { SkeletonTheme } from 'react-loading-skeleton'
 import { GlobalTimeline } from './components/GlobalTimeline'
 import { LightboxProvider } from './components/Lightbox'
 import { Rail } from './components/Rail'
@@ -128,57 +129,59 @@ export default function App() {
   }, [goTo])
 
   return (
-    <LightboxProvider images={allImages}>
-      <div className={`app${pinned ? ' app--pinned' : ''}`}>
-        <Rail
-          sections={sections}
-          activeId={activeId}
-          progress={progress}
-          pinned={pinned}
-          onPinnedChange={setPinned}
-        />
+    <SkeletonTheme baseColor="#17140f" highlightColor="#241f18" duration={1.6}>
+      <LightboxProvider images={allImages}>
+        <div className={`app${pinned ? ' app--pinned' : ''}`}>
+          <Rail
+            sections={sections}
+            activeId={activeId}
+            progress={progress}
+            pinned={pinned}
+            onPinnedChange={setPinned}
+          />
 
-        <main className="app__content">
-          <header className="intro">
-            <p className="intro__eyebrow">В мрачной тьме далёкого будущего</p>
-            <h1 className="intro__title">
-              Краткий лор
-              <br />
-              Warhammer 40K
-            </h1>
-            {epigraph && (
-              <p className="intro__epigraph">{epigraph.replace(/^\*|\*$/g, '')}</p>
-            )}
-          </header>
+          <main className="app__content">
+            <header className="intro">
+              <p className="intro__eyebrow">В мрачной тьме далёкого будущего</p>
+              <h1 className="intro__title">
+                Краткий лор
+                <br />
+                Warhammer 40K
+              </h1>
+              {epigraph && (
+                <p className="intro__epigraph">{epigraph.replace(/^\*|\*$/g, '')}</p>
+              )}
+            </header>
 
-          <GlobalTimeline sections={sections} />
+            <GlobalTimeline sections={sections} />
 
-          <div
-            ref={listRef}
-            className="sections"
-            style={{ height: totalSize, position: 'relative' }}
-          >
-            {items.map((item) => (
-              <div
-                key={item.key}
-                data-index={item.index}
-                ref={virtualizer.measureElement}
-                className="sections__slot"
-                style={{ transform: `translateY(${item.start - listTop}px)` }}
-              >
-                <SectionView section={sections[item.index]} />
-              </div>
-            ))}
-          </div>
+            <div
+              ref={listRef}
+              className="sections"
+              style={{ height: totalSize, position: 'relative' }}
+            >
+              {items.map((item) => (
+                <div
+                  key={item.key}
+                  data-index={item.index}
+                  ref={virtualizer.measureElement}
+                  className="sections__slot"
+                  style={{ transform: `translateY(${item.start - listTop}px)` }}
+                >
+                  <SectionView section={sections[item.index]} />
+                </div>
+              ))}
+            </div>
 
-          <footer className="outro">
-            <p>
-              Warhammer 40,000 и все связанные названия, персонажи и изображения —
-              собственность Games Workshop Ltd. Некоммерческий фанатский проект.
-            </p>
-          </footer>
-        </main>
-      </div>
-    </LightboxProvider>
+            <footer className="outro">
+              <p>
+                Warhammer 40,000 и все связанные названия, персонажи и изображения —
+                собственность Games Workshop Ltd. Некоммерческий фанатский проект.
+              </p>
+            </footer>
+          </main>
+        </div>
+      </LightboxProvider>
+    </SkeletonTheme>
   )
 }
