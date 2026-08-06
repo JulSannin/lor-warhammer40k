@@ -1,0 +1,124 @@
+.pg {
+  margin-top: 2.5rem !important;
+}
+
+.pg__title {
+  margin-bottom: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.pg__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 1.25rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pg__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.pg__frame {
+  position: relative;
+  border-top: 2px solid var(--line-strong);
+}
+
+/* Полоса сверху карточки — цвет судьбы: лоялист, предатель, стёртый */
+.pg__card--loyal .pg__frame {
+  border-top-color: #3f8fd4;
+}
+
+.pg__card--traitor .pg__frame {
+  border-top-color: #d94436;
+}
+
+.pg__card.is-erased .pg__frame {
+  border-top-color: var(--line);
+}
+
+.pg__frame .zoom img {
+  aspect-ratio: 2 / 3;
+}
+
+/* Стёртые из истории: пустая рамка вместо портрета */
+.pg__void {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 2 / 3;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--surface),
+    var(--surface) 6px,
+    var(--bg) 6px,
+    var(--bg) 12px
+  );
+  border: 1px solid var(--line);
+}
+
+.pg__void span {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  color: var(--faint);
+}
+
+.pg__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.pg__num {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--faint);
+}
+
+.pg__name {
+  font-size: 0.95rem;
+  line-height: 1.25;
+  color: var(--bone);
+}
+
+.pg__card.is-erased .pg__name {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.pg__legion {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.pg__fate {
+  margin-top: 0.15rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.pg__card--traitor .pg__fate {
+  color: #d94436;
+}
+
+.pg__card--loyal .pg__fate {
+  color: #3f8fd4;
+}
+
+@media (max-width: 520px) {
+  .pg__list {
+    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+    gap: 1rem 0.75rem;
+  }
+}

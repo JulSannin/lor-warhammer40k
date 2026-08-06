@@ -76,8 +76,19 @@ export interface SectionImage {
   remote: string
   alt: string
   caption: string
-  /** `hero` — крупный кадр в шапке раздела, `inline` — по ходу текста. */
-  role: 'hero' | 'inline'
+  /**
+   * `hero` — крупный кадр в шапке раздела, `inline` — по ходу текста,
+   * `primarch` — портрет для галереи примархов под таблицей легионов.
+   */
+  role: 'hero' | 'inline' | 'primarch'
+  /** Для роли `primarch` — номер примарха римскими цифрами, как в таблице. */
+  primarch?: string
+  /**
+   * Показывать целиком, а не обрезать по пропорции кадра. Нужно там, где
+   * важна вся картинка: карта галактики с Цикатрикс Маледиктум при обрезке
+   * теряет и заголовок, и легенду.
+   */
+  contain?: boolean
   width: number
   height: number
   /**

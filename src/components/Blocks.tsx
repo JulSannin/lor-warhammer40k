@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import type { Block, SectionImage } from '../data/types'
 import { ZoomableImage } from './Lightbox'
+import { PrimarchGrid } from './PrimarchGrid'
 import { RichText } from './RichText'
 import './Blocks.css'
 
@@ -92,12 +93,16 @@ function InlineImage({ image }: { image: SectionImage }) {
   return (
     // Появление на CSS, а не на motion: наблюдателей выходило до шести
     // на раздел, и вся эта работа приходилась на кадр его монтирования
-    <figure className="blk-figure">
+    <figure className={`blk-figure${image.contain ? ' blk-figure--contain' : ''}`}>
       <ZoomableImage image={image} />
       <figcaption>{image.caption}</figcaption>
     </figure>
   )
 }
+
+/** Таблица примархов узнаётся по колонкам, а не по номеру в разделе. */
+const isPrimarchTable = (b: Block) =>
+  b.type === 'table' && b.head[0] === '№' && b.head[1] === 'Примарх'
 
 /**
  * Раскладывает блоки раздела и вплетает картинки после подзаголовков,
@@ -129,6 +134,17 @@ export const Blocks = memo(function Blocks({
 
   blocks.forEach((block, i) => {
     out.push(<BlockView key={`b${i}`} block={block} />)
+
+    // Сразу под таблицей легионов — галерея портретов из неё же
+    if (isPrimarchTable(block)) {
+      out.push(
+        <PrimarchGrid
+          key={`pg${i}`}
+          table={block as Extract<Block, { type: 'table' }>}
+          images={images}
+        />,
+      )
+    }
 
     if (block.type === 'heading') {
       headingIndex += 1

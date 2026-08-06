@@ -227,3 +227,10 @@
     min-width: 7rem;
   }
 }
+
+/* Карта или схема: показываем целиком, обрезка съела бы заголовок и легенду */
+.blk-figure--contain .zoom img {
+  aspect-ratio: auto;
+  object-fit: contain;
+  background: var(--surface);
+}

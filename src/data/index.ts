@@ -49,7 +49,10 @@ function inPageOrder(section: Section): SectionImage[] {
     .filter((i) => i.role === 'inline')
     .slice()
     .sort((a, b) => (a.afterHeading ?? Infinity) - (b.afterHeading ?? Infinity))
-  return section.hero ? [section.hero, ...inline] : inline
+  // Портреты примархов идут следом: в вёрстке они стоят в галерее под
+  // таблицей легионов, и в попапе должны листаться в том же порядке
+  const primarchs = section.images.filter((i) => i.role === 'primarch')
+  return [...(section.hero ? [section.hero] : []), ...inline, ...primarchs]
 }
 
 export const allImages: SectionImage[] = sections.flatMap(inPageOrder)
@@ -75,14 +78,14 @@ const MEASURED: Record<string, number> = {
   'war-in-heaven': 6952,
   'eldar-fall': 4465,
   'pre-imperium': 3277,
-  'emperor-crusade': 7466,
-  'horus-heresy': 5208,
-  'ten-thousand-years': 5803,
+  'emperor-crusade': 8643,
+  'horus-heresy': 7502,
+  'ten-thousand-years': 7332,
   chaos: 5964,
   xenos: 6871,
-  indomitus: 4753,
+  indomitus: 6443,
   thesis: 2251,
-  disputed: 3742,
+  disputed: 4507,
 }
 
 /** Запасная оценка для раздела, которого ещё нет в таблице замеров. */
