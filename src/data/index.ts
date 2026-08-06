@@ -72,17 +72,17 @@ export const allImages: SectionImage[] = sections.flatMap(inPageOrder)
  * одновременно находятся только соседние разделы.
  */
 const MEASURED: Record<string, number> = {
-  'war-in-heaven': 5390,
-  'eldar-fall': 3788,
-  'pre-imperium': 2870,
-  'emperor-crusade': 6701,
-  'horus-heresy': 5056,
-  'ten-thousand-years': 3476,
-  chaos: 5932,
-  xenos: 7523,
-  indomitus: 4872,
-  thesis: 1518,
-  disputed: 2212,
+  'war-in-heaven': 6952,
+  'eldar-fall': 4465,
+  'pre-imperium': 3277,
+  'emperor-crusade': 7466,
+  'horus-heresy': 5208,
+  'ten-thousand-years': 5803,
+  chaos: 5964,
+  xenos: 6871,
+  indomitus: 4753,
+  thesis: 2251,
+  disputed: 3742,
 }
 
 /** Запасная оценка для раздела, которого ещё нет в таблице замеров. */
