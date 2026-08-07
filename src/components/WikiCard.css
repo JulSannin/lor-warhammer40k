@@ -19,6 +19,11 @@
     border-color 0.2s var(--ease);
 }
 
+.wiki-term--plain {
+  font-weight: inherit;
+  color: inherit;
+}
+
 .wiki-term:hover,
 .wiki-term:focus-visible {
   color: var(--accent, var(--gold));
