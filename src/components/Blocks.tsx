@@ -5,19 +5,19 @@ import { PrimarchGrid } from './PrimarchGrid'
 import { RichText } from './RichText'
 import './Blocks.css'
 
-function BlockView({ block }: { block: Block }) {
+function BlockView({ block, linkable }: { block: Block; linkable?: Set<string> }) {
   switch (block.type) {
     case 'heading':
       return (
         <h3 className="blk-heading" id={block.anchor}>
-          <RichText text={block.text} />
+          <RichText text={block.text} linkable={linkable} />
         </h3>
       )
 
     case 'paragraph':
       return (
         <p className="blk-p">
-          <RichText text={block.text} />
+          <RichText text={block.text} linkable={linkable} />
         </p>
       )
 
@@ -26,7 +26,7 @@ function BlockView({ block }: { block: Block }) {
         <ol className="blk-list blk-list--ordered">
           {block.items.map((item, i) => (
             <li key={i}>
-              <RichText text={item} />
+              <RichText text={item} linkable={linkable} />
             </li>
           ))}
         </ol>
@@ -34,7 +34,7 @@ function BlockView({ block }: { block: Block }) {
         <ul className="blk-list">
           {block.items.map((item, i) => (
             <li key={i}>
-              <RichText text={item} />
+              <RichText text={item} linkable={linkable} />
             </li>
           ))}
         </ul>
@@ -60,7 +60,7 @@ function BlockView({ block }: { block: Block }) {
                 <tr key={i}>
                   {row.map((cell, j) => (
                     <td key={j}>
-                      <RichText text={cell} />
+                      <RichText text={cell} linkable={linkable} />
                     </td>
                   ))}
                 </tr>
@@ -73,7 +73,7 @@ function BlockView({ block }: { block: Block }) {
     case 'quote':
       return (
         <blockquote className="blk-quote">
-          <RichText text={block.text} />
+          <RichText text={block.text} linkable={linkable} />
         </blockquote>
       )
 
@@ -82,7 +82,7 @@ function BlockView({ block }: { block: Block }) {
         <aside className="blk-disputed">
           <p className="blk-disputed__tag">спорно</p>
           <p>
-            <RichText text={block.text} />
+            <RichText text={block.text} linkable={linkable} />
           </p>
         </aside>
       )
@@ -147,10 +147,19 @@ const isPrimarchTable = (b: Block) =>
 export const Blocks = memo(function Blocks({
   blocks,
   images,
+  wikiFirst,
 }: {
   blocks: Block[]
   images: SectionImage[]
+  wikiFirst: Record<string, number>
 }) {
+  // Термин → блок первого упоминания разворачиваем в обратную сторону:
+  // вёрстке нужно знать, что делать кликабельным в текущем блоке
+  const linkableByBlock: (Set<string> | undefined)[] = blocks.map(() => undefined)
+  for (const [term, index] of Object.entries(wikiFirst)) {
+    if (index < linkableByBlock.length) (linkableByBlock[index] ??= new Set()).add(term)
+  }
+
   const byHeading = new Map<number, SectionImage[]>()
   const trailing: SectionImage[] = []
 
@@ -168,7 +177,7 @@ export const Blocks = memo(function Blocks({
   const out: React.ReactNode[] = []
 
   blocks.forEach((block, i) => {
-    out.push(<BlockView key={`b${i}`} block={block} />)
+    out.push(<BlockView key={`b${i}`} block={block} linkable={linkableByBlock[i]} />)
 
     // Сразу под таблицей легионов — галерея портретов из неё же
     if (isPrimarchTable(block)) {

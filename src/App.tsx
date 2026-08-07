@@ -5,6 +5,7 @@ import { GlobalTimeline } from './components/GlobalTimeline'
 import { LightboxProvider } from './components/Lightbox'
 import { Rail } from './components/Rail'
 import { SectionView } from './components/SectionView'
+import { WikiProvider } from './components/WikiCard'
 import { useScrollSpy } from './hooks/useScrollSpy'
 import { allImages, epigraph, heightBucket, sections, sectionHeights } from './data'
 import './App.css'
@@ -204,67 +205,69 @@ export default function App() {
 
   return (
     <SkeletonTheme baseColor="#17140f" highlightColor="#241f18" duration={1.6}>
-      <LightboxProvider images={allImages}>
-        <div className={`app${pinned ? ' app--pinned' : ''}`}>
-          {/*
+      <WikiProvider>
+        <LightboxProvider images={allImages}>
+          <div className={`app${pinned ? ' app--pinned' : ''}`}>
+            {/*
             Обход навигации — первым в порядке обхода, иначе с клавиатуры
             до текста придётся пройти тринадцать остановок в боковой
             панели. Ссылка не видна, пока на неё не встал фокус.
           */}
-          <a className="skip-link" href="#содержание">
-            Перейти к содержанию
-          </a>
+            <a className="skip-link" href="#содержание">
+              Перейти к содержанию
+            </a>
 
-          <Rail
-            sections={sections}
-            activeId={activeId}
-            progress={progress}
-            pinned={pinned}
-            onPinnedChange={setPinned}
-          />
+            <Rail
+              sections={sections}
+              activeId={activeId}
+              progress={progress}
+              pinned={pinned}
+              onPinnedChange={setPinned}
+            />
 
-          <main className="app__content" id="содержание" tabIndex={-1}>
-            <header className="intro">
-              <p className="intro__eyebrow">В мрачной тьме далёкого будущего</p>
-              <h1 className="intro__title">
-                Краткий лор
-                <br />
-                Warhammer 40K
-              </h1>
-              {epigraph && (
-                <p className="intro__epigraph">{epigraph.replace(/^\*|\*$/g, '')}</p>
-              )}
-            </header>
+            <main className="app__content" id="содержание" tabIndex={-1}>
+              <header className="intro">
+                <p className="intro__eyebrow">В мрачной тьме далёкого будущего</p>
+                <h1 className="intro__title">
+                  Краткий лор
+                  <br />
+                  Warhammer 40K
+                </h1>
+                {epigraph && (
+                  <p className="intro__epigraph">{epigraph.replace(/^\*|\*$/g, '')}</p>
+                )}
+              </header>
 
-            <GlobalTimeline sections={sections} />
+              <GlobalTimeline sections={sections} />
 
-            <div
-              ref={listRef}
-              className="sections"
-              style={{ height: totalSize, position: 'relative' }}
-            >
-              {items.map((item) => (
-                <div
-                  key={item.key}
-                  data-index={item.index}
-                  ref={virtualizer.measureElement}
-                  className="sections__slot"
-                  style={{ transform: `translateY(${item.start - listTop}px)` }}
-                >
-                  <SectionView section={sections[item.index]} />
-                </div>
-              ))}
-            </div>
+              <div
+                ref={listRef}
+                className="sections"
+                style={{ height: totalSize, position: 'relative' }}
+              >
+                {items.map((item) => (
+                  <div
+                    key={item.key}
+                    data-index={item.index}
+                    ref={virtualizer.measureElement}
+                    className="sections__slot"
+                    style={{ transform: `translateY(${item.start - listTop}px)` }}
+                  >
+                    <SectionView section={sections[item.index]} />
+                  </div>
+                ))}
+              </div>
 
-            <footer className="outro">
-              <p>
-                Warhammer 40,000 и все связанные названия, персонажи и изображения —
-                собственность Games Workshop Ltd. Некоммерческий фанатский проект.
-              </p>
-            </footer>
-          </main>
-        </div>
-      </LightboxProvider>
+              <footer className="outro">
+                <p>
+                  Warhammer 40,000 и все связанные названия, персонажи и изображения —
+                  собственность Games Workshop Ltd. Некоммерческий фанатский проект.
+                </p>
+              </footer>
+            </main>
+          </div>
+        </LightboxProvider>
+      </WikiProvider>
     </SkeletonTheme>
   )
 }

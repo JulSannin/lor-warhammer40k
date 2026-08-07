@@ -1,7 +1,14 @@
 import generated from './content.generated.json' with { type: 'json' }
+import wikiGenerated from './wiki.generated.json' with { type: 'json' }
 import { meta } from './meta'
 import { images } from './images'
-import type { GeneratedContent, Section, SectionImage } from './types'
+import type { Block, GeneratedContent, Section, SectionImage, WikiEntry } from './types'
+
+/**
+ * Выжимки статей русской вики, собранные scripts/fetch-wiki.mjs.
+ * Ключ — термин ровно в том виде, в каком он выделен жирным в лоре.
+ */
+export const wiki = wikiGenerated as Record<string, WikiEntry>
 
 // JSON-импорт даёт `type: string` вместо литеральных типов блоков, поэтому
 // прямое приведение TypeScript отвергает. Форму гарантирует генератор
@@ -30,8 +37,38 @@ function assemble(): Section[] {
       ...m,
       images: pics,
       hero: pics.find((i) => i.role === 'hero') ?? null,
+      wikiFirst: firstMentions(parsed.blocks),
     }
   })
+}
+
+/**
+ * Находит для каждого термина блок, где раздел упоминает его впервые.
+ *
+ * Блоки перебираются в том же порядке, в каком их выводит вёрстка, —
+ * иначе кликабельным окажется не первое упоминание, а произвольное.
+ * Термины без статьи на вики сюда не попадают: они остаются обычным
+ * жирным, и читатель ни разу не ткнётся в пустоту.
+ */
+function firstMentions(blocks: Block[]): Record<string, number> {
+  const first: Record<string, number> = {}
+
+  blocks.forEach((block, index) => {
+    const texts: string[] = []
+    if ('text' in block) texts.push(block.text)
+    if ('items' in block) texts.push(...block.items)
+    if ('head' in block) texts.push(...block.head)
+    if ('rows' in block) for (const row of block.rows) texts.push(...row)
+
+    for (const text of texts) {
+      for (const match of text.matchAll(/\*\*(.+?)\*\*/g)) {
+        const term = match[1]
+        if (term in wiki && !(term in first)) first[term] = index
+      }
+    }
+  })
+
+  return first
 }
 
 export const sections: Section[] = assemble()
@@ -69,9 +106,9 @@ export const allImages: SectionImage[] = sections.flatMap(inPageOrder)
  *
  * Таблиц три, а не одна, потому что от ширины высота зависит сильно и
  * не монотонно. «Крестовый поход» на телефоне выше, чем на ноутбуке
- * (11268 против 9403): текст переливается, а галерея примархов идёт
+ * (11289 против 9434): текст переливается, а галерея примархов идёт
  * в две колонки вместо пяти. А «Война в Небесах», наоборот, ниже
- * (5908 против 6952): широкие кадры 16:9 на узком экране мельчают.
+ * (5922 против 6966): широкие кадры 16:9 на узком экране мельчают.
  * С одной таблицей от 1440px высота документа на телефоне уезжала
  * на 10%, на планшете на 17% — и ползунок подрастал по ходу чтения.
  *
@@ -87,45 +124,45 @@ export const allImages: SectionImage[] = sections.flatMap(inPageOrder)
 const MEASURED: Record<string, number>[] = [
   // 390px — телефон
   {
-    'war-in-heaven': 5908,
-    'eldar-fall': 7024,
-    'pre-imperium': 2825,
-    'emperor-crusade': 11268,
-    'horus-heresy': 6744,
-    'ten-thousand-years': 5396,
-    chaos: 3371,
-    xenos: 7265,
-    indomitus: 6780,
-    thesis: 1693,
-    disputed: 3364,
+    'war-in-heaven': 5922,
+    'eldar-fall': 7095,
+    'pre-imperium': 2857,
+    'emperor-crusade': 11289,
+    'horus-heresy': 6788,
+    'ten-thousand-years': 5467,
+    chaos: 3405,
+    xenos: 7339,
+    indomitus: 6833,
+    thesis: 1694,
+    disputed: 3370,
   },
   // 834px — планшет
   {
-    'war-in-heaven': 5362,
-    'eldar-fall': 4655,
-    'pre-imperium': 2489,
-    'emperor-crusade': 8261,
-    'horus-heresy': 5989,
-    'ten-thousand-years': 5587,
-    chaos: 4265,
-    xenos: 5510,
-    indomitus: 5752,
-    thesis: 1767,
-    disputed: 4002,
+    'war-in-heaven': 5376,
+    'eldar-fall': 4668,
+    'pre-imperium': 2492,
+    'emperor-crusade': 8292,
+    'horus-heresy': 6002,
+    'ten-thousand-years': 5599,
+    chaos: 4270,
+    xenos: 5527,
+    indomitus: 5770,
+    thesis: 1768,
+    disputed: 4008,
   },
   // 1440px — ноутбук и шире
   {
-    'war-in-heaven': 6952,
-    'eldar-fall': 5952,
-    'pre-imperium': 3277,
-    'emperor-crusade': 9403,
-    'horus-heresy': 7741,
-    'ten-thousand-years': 7332,
-    chaos: 5964,
-    xenos: 6871,
-    indomitus: 7004,
-    thesis: 2251,
-    disputed: 5111,
+    'war-in-heaven': 6966,
+    'eldar-fall': 5965,
+    'pre-imperium': 3280,
+    'emperor-crusade': 9434,
+    'horus-heresy': 7786,
+    'ten-thousand-years': 7345,
+    chaos: 5969,
+    xenos: 6856,
+    indomitus: 7024,
+    thesis: 2252,
+    disputed: 5117,
   },
 ]
 

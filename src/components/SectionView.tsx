@@ -57,7 +57,7 @@ export const SectionView = memo(function SectionView({ section }: { section: Sec
       <Timeline events={section.events} label={section.navLabel} />
 
       <div className="section__body">
-        <Blocks blocks={section.blocks} images={section.images} />
+        <Blocks blocks={section.blocks} images={section.images} wikiFirst={section.wikiFirst} />
       </div>
     </section>
   )

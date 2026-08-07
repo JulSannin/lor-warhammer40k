@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import Skeleton from 'react-loading-skeleton'
 import type { SectionImage } from '../data/types'
+import { useModal } from '../hooks/useModal'
 import { LightboxContext, useLightbox } from './lightbox-context'
 import 'react-loading-skeleton/dist/skeleton.css'
 import './Lightbox.css'
@@ -72,47 +73,16 @@ export function LightboxProvider({
 
   const isOpen = index !== null
 
-  useEffect(() => {
-    if (!isOpen) return
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close()
-      else if (e.key === 'ArrowRight') step(1)
+  // Стрелки листают кадры — остальное поведение окна общее с карточкой вики
+  const onKey = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') step(1)
       else if (e.key === 'ArrowLeft') step(-1)
-      else if (e.key === 'Tab') {
-        // Простая ловушка фокуса: в попапе всего три кнопки
-        const focusable = document.querySelectorAll<HTMLElement>('.lb [data-focusable]')
-        if (focusable.length === 0) return
-        const list = [...focusable]
-        const first = list[0]
-        const last = list[list.length - 1]
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault()
-          last.focus()
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault()
-          first.focus()
-        }
-      }
-    }
+    },
+    [step],
+  )
 
-    // Блокируем прокрутку фона, компенсируя ширину полосы прокрутки,
-    // чтобы страница под попапом не дёргалась
-    const bar = window.innerWidth - document.documentElement.clientWidth
-    const prevOverflow = document.body.style.overflow
-    const prevPad = document.body.style.paddingRight
-    document.body.style.overflow = 'hidden'
-    if (bar > 0) document.body.style.paddingRight = `${bar}px`
-
-    window.addEventListener('keydown', onKey)
-    closeRef.current?.focus()
-
-    return () => {
-      window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prevOverflow
-      document.body.style.paddingRight = prevPad
-    }
-  }, [isOpen, close, step])
+  useModal({ open: isOpen, onClose: close, root: '.lb', onKey, focusRef: closeRef })
 
   const api = useMemo(() => ({ open }), [open])
   const current = index === null ? null : images[index]

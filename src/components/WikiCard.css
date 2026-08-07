@@ -1,0 +1,168 @@
+/*
+ * Выделенный термин, у которого есть статья на вики.
+ *
+ * Остаётся жирным, как и весь остальной strong, — читаемость текста
+ * важнее заметности ссылок. О том, что термин кликабельный, говорит
+ * пунктирная линия снизу: она не спорит с текстом, но видна.
+ */
+.wiki-term {
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--bone);
+  background: none;
+  border: none;
+  border-bottom: 1px dashed color-mix(in srgb, var(--accent, var(--gold)) 55%, transparent);
+  cursor: help;
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+
+.wiki-term:hover,
+.wiki-term:focus-visible {
+  color: var(--accent, var(--gold));
+  border-bottom-color: currentColor;
+}
+
+.wiki-term:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* ---------------- Карточка ---------------- */
+
+.wc {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgb(4 4 3 / 0.82);
+  animation: wc-in 0.18s var(--ease) both;
+}
+
+@keyframes wc-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.wc__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(34rem, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 0.6);
+  animation: wc-rise 0.22s var(--ease) both;
+}
+
+@keyframes wc-rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc,
+  .wc__card {
+    animation: none;
+  }
+}
+
+.wc__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 1rem;
+  color: var(--bone);
+  background: rgb(10 9 8 / 0.72);
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.wc__close:hover,
+.wc__close:focus-visible {
+  color: var(--gold);
+  border-color: var(--gold-dim);
+}
+
+/*
+ * Заглавная картинка обрезается по широкому кадру: у статей вики
+ * пропорции какие угодно, от вытянутого портрета до панорамы, и без
+ * общей рамки карточки прыгали бы по высоте от термина к термину.
+ */
+.wc__thumb {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+
+/*
+ * Картинка на белом — фото миниатюры, схема, герб; таких на вики
+ * примерно каждая шестая. Обрезка рубит их пополам, а на тёмной
+ * карточке белый фон бьёт по глазам. Показываем целиком и на светлой
+ * подложке — тогда белое поле читается как вклейка, а не как брак.
+ */
+.wc__thumb--light {
+  object-fit: contain;
+  padding: 0.75rem;
+  background: #ddd6c4;
+}
+
+.wc__body {
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+}
+
+.wc__source {
+  margin-bottom: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-label);
+}
+
+.wc__title {
+  margin-bottom: 0.75rem;
+  font-size: clamp(1.35rem, 3.5vw, 1.75rem);
+  line-height: 1.15;
+  color: var(--bone);
+}
+
+.wc__extract {
+  color: var(--text);
+}
+
+.wc__link {
+  display: inline-block;
+  margin-top: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--gold) 40%, transparent);
+  text-underline-offset: 0.25em;
+}
+
+.wc__link:hover,
+.wc__link:focus-visible {
+  color: var(--gold-bright);
+  text-decoration-color: currentColor;
+}
