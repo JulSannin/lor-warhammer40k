@@ -51,9 +51,8 @@
 
 .wc__card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  width: min(34rem, 100%);
+  display: grid;
+  width: min(54rem, 100%);
   max-height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -61,6 +60,28 @@
   border: 1px solid var(--line-strong);
   box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 0.6);
   animation: wc-rise 0.22s var(--ease) both;
+}
+
+/*
+ * Вертикальная картинка идёт колонкой слева от текста: 87 из 149
+ * заглавных картинок вики — портреты, и общая широкая рамка резала
+ * их по глазам. Минимальная высота нужна, чтобы у короткой справки
+ * портрет не сплющивался в полоску.
+ */
+.wc__card--side {
+  grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+  min-height: min(26rem, 70vh);
+}
+
+/* Горизонтальная и квадратная — полосой сверху, во всю ширину */
+.wc__card--top,
+.wc__card--bare {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Без картинки карточке ни к чему быть широкой — там только текст */
+.wc__card--bare {
+  width: min(34rem, 100%);
 }
 
 @keyframes wc-rise {
@@ -99,17 +120,23 @@
   border-color: var(--gold-dim);
 }
 
-/*
- * Заглавная картинка обрезается по широкому кадру: у статей вики
- * пропорции какие угодно, от вытянутого портрета до панорамы, и без
- * общей рамки карточки прыгали бы по высоте от термина к термину.
- */
 .wc__thumb {
   width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 10;
   object-fit: cover;
   background: var(--surface-2);
+}
+
+/* Портрет заполняет свою колонку целиком, от края до края карточки */
+.wc__card--side .wc__thumb {
+  height: 100%;
+  min-height: 100%;
+  border-right: 1px solid var(--line);
+}
+
+/* Пейзаж — полосой сверху; 21 к 9 не даёт ей съесть половину экрана */
+.wc__card--top .wc__thumb {
+  height: auto;
+  aspect-ratio: 21 / 9;
   border-bottom: 1px solid var(--line);
 }
 
@@ -125,8 +152,31 @@
   background: #ddd6c4;
 }
 
+/*
+ * Картинка мельче рамки — показываем в натуральную величину по центру.
+ * scale-down делает ровно это: уменьшает, если не влезает, но никогда
+ * не растягивает. Без него «Джокаеро» 500×499 раздувало до 862 в ширину.
+ */
+.wc__thumb--small {
+  object-fit: scale-down;
+}
+
+/*
+ * Светлая картинка в верхней полосе живёт по своей пропорции: общая
+ * рамка 21:9 оставляла вокруг вытянутой схемы широкие поля пергамента
+ * и раздувала карточку впустую.
+ */
+.wc__card--top .wc__thumb--light {
+  aspect-ratio: auto;
+  height: auto;
+  max-height: 46vh;
+}
+
 .wc__body {
-  padding: clamp(1.1rem, 3vw, 1.6rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.25rem, 3vw, 2rem);
 }
 
 .wc__source {
@@ -146,7 +196,32 @@
 }
 
 .wc__extract {
+  font-size: 1.05rem;
   color: var(--text);
+}
+
+/*
+ * На узком экране колонки рядом не помещаются — картинка уходит
+ * наверх. Ограничение по высоте важнее пропорции: вертикальный портрет
+ * во всю ширину телефона занял бы полтора экрана, и до текста пришлось
+ * бы прокручивать.
+ */
+@media (max-width: 46rem) {
+  .wc__card--side {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .wc__card--side .wc__thumb {
+    height: 40vh;
+    min-height: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .wc__card--top .wc__thumb {
+    aspect-ratio: 16 / 9;
+  }
 }
 
 .wc__link {
