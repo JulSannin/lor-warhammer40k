@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from 'react'
+import { WikiTerm } from './WikiCard'
 
 /**
  * Разметка, унаследованная из markdown: `**жирный**`, `*курсив*`,
@@ -10,7 +11,7 @@ import { Fragment, type ReactNode } from 'react'
  */
 const INLINE = /\*\*([^*]+)\*\*|\*([^*]+)\*|\[([^\]]+)\]\(([^)]+)\)/g
 
-function parse(text: string, keyPrefix: string): ReactNode[] {
+function parse(text: string, keyPrefix: string, linkable?: Set<string>): ReactNode[] {
   const out: ReactNode[] = []
   let last = 0
   let i = 0
@@ -23,7 +24,13 @@ function parse(text: string, keyPrefix: string): ReactNode[] {
     const key = `${keyPrefix}-${i++}`
 
     if (bold !== undefined) {
-      out.push(<strong key={key}>{bold}</strong>)
+      out.push(
+        linkable?.has(bold) ? (
+          <WikiTerm key={key} term={bold} />
+        ) : (
+          <strong key={key}>{bold}</strong>
+        ),
+      )
     } else if (italic !== undefined) {
       out.push(<em key={key}>{italic}</em>)
     } else if (linkText !== undefined && href !== undefined) {
@@ -40,7 +47,12 @@ function parse(text: string, keyPrefix: string): ReactNode[] {
   return out
 }
 
-export function RichText({ text }: { text: string }) {
+/**
+ * @param linkable Термины, которые в этом блоке нужно сделать кликабельными.
+ *   Набор считается на уровне раздела: у термина кликабельно только первое
+ *   упоминание, и только если для него есть статья на вики.
+ */
+export function RichText({ text, linkable }: { text: string; linkable?: Set<string> }) {
   // Мягкие переносы значимы: в разделе про богов Хаоса девиз стоит
   // отдельной строкой, и склеивать его с описанием нельзя.
   const lines = text.split('\n')
@@ -50,7 +62,7 @@ export function RichText({ text }: { text: string }) {
       {lines.map((line, i) => (
         <Fragment key={i}>
           {i > 0 && <br />}
-          {parse(line, String(i))}
+          {parse(line, String(i), linkable)}
         </Fragment>
       ))}
     </>
