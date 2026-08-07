@@ -102,6 +102,39 @@ function InlineImage({ image }: { image: SectionImage }) {
   )
 }
 
+/**
+ * Ряд картинок под одним подзаголовком.
+ *
+ * По умолчанию две в ряд, нечётная последняя занимает ряд целиком.
+ * Но если вся группа — вертикальные портреты, показываемые целиком
+ * (contain), они встают одним рядом: такой набор читается как триптих,
+ * и разрывать его пополам незачем. Так собран пантеон эльдар.
+ */
+function FigureGroup({ images }: { images: SectionImage[] }) {
+  if (images.length === 1) {
+    return (
+      <div className="blk-figures">
+        <InlineImage image={images[0]} />
+      </div>
+    )
+  }
+
+  const allPortraits = images.every((i) => i.contain)
+
+  return (
+    <div
+      className={`blk-figures blk-figures--${allPortraits ? 'row' : 'pair'}`}
+      style={
+        allPortraits ? ({ '--fig-cols': images.length } as React.CSSProperties) : undefined
+      }
+    >
+      {images.map((i) => (
+        <InlineImage key={i.src} image={i} />
+      ))}
+    </div>
+  )
+}
+
 /** Таблица примархов узнаётся по колонкам, а не по номеру в разделе. */
 const isPrimarchTable = (b: Block) =>
   b.type === 'table' && b.head[0] === '№' && b.head[1] === 'Примарх'
@@ -151,32 +184,12 @@ export const Blocks = memo(function Blocks({
     if (block.type === 'heading') {
       headingIndex += 1
       const pics = byHeading.get(headingIndex)
-      if (pics?.length) {
-        out.push(
-          <div
-            key={`img${i}`}
-            className={`blk-figures${pics.length > 1 ? ' blk-figures--pair' : ''}`}
-          >
-            {pics.map((p) => (
-              <InlineImage key={p.src} image={p} />
-            ))}
-          </div>,
-        )
-      }
+      if (pics?.length) out.push(<FigureGroup key={`img${i}`} images={pics} />)
     }
   })
 
   if (trailing.length) {
-    out.push(
-      <div
-        key="img-tail"
-        className={`blk-figures${trailing.length > 1 ? ' blk-figures--pair' : ''}`}
-      >
-        {trailing.map((p) => (
-          <InlineImage key={p.src} image={p} />
-        ))}
-      </div>,
-    )
+    out.push(<FigureGroup key="img-tail" images={trailing} />)
   }
 
   return <div className="blocks">{out}</div>

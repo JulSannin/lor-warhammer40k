@@ -78,7 +78,7 @@ export const allImages: SectionImage[] = sections.flatMap(inPageOrder)
  */
 const MEASURED: Record<string, number> = {
   'war-in-heaven': 6952,
-  'eldar-fall': 6538,
+  'eldar-fall': 5952,
   'pre-imperium': 3277,
   'emperor-crusade': 9403,
   'horus-heresy': 7741,

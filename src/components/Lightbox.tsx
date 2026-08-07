@@ -229,15 +229,13 @@ export function ZoomableImage({
         alt={image.alt}
         width={image.width}
         height={image.height}
-        // У кадров с обрезкой пропорция задана в CSS. У показываемых
-        // целиком её нет, и без этой строки место под картинку не
-        // резервируется: вёрстка прыгает в момент загрузки, а вместе
-        // с ней уезжает и высота раздела.
-        style={
-          image.contain || image.plate
-            ? { aspectRatio: `${image.width} / ${image.height}` }
-            : undefined
-        }
+        // Собственная пропорция кадра — переменной, а не готовым
+        // aspect-ratio: инлайновое свойство перебивало бы правила CSS,
+        // а показанным целиком картинкам пропорцию иногда задаёт
+        // раскладка (портреты в ряду выравниваются по общей рамке).
+        // Резервировать место всё равно нужно: без этого вёрстка
+        // прыгает в момент загрузки и уезжает высота раздела.
+        style={{ '--img-ratio': `${image.width} / ${image.height}` } as React.CSSProperties}
         loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"

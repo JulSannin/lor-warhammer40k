@@ -197,9 +197,43 @@
   grid-column: 1 / -1;
 }
 
+/*
+ * Группа из одних вертикальных портретов — один ряд на всех: пантеон
+ * эльдар читается как триптих, и правило «две в ряд» его только рвало.
+ * Число колонок приходит из разметки: сколько богов, столько и колонок.
+ */
+.blk-figures--row {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(var(--fig-cols, 2), 1fr);
+}
+
+/*
+ * В ряду все рамки одного размера, а портрет вписан внутрь. Иначе
+ * размер задавала бы ширина колонки, портреты разных пропорций выходили
+ * бы разной высоты, и подписи вставали бы на трёх разных уровнях.
+ * Поля вокруг портрета работают как паспарту.
+ */
+.blk-figures--row .blk-figure--contain .zoom {
+  width: 100%;
+}
+
+.blk-figures--row .blk-figure--contain .zoom img {
+  width: 100%;
+  max-height: none;
+  aspect-ratio: 3 / 4;
+}
+
 /* Ниже 34rem половина колонки уже уже читаемого кадра — ставим в столбик */
 @media (max-width: 34rem) {
   .blk-figures--pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Портрету в ряду нужно больше места: трое в ряд мельчают раньше пары */
+@media (max-width: 44rem) {
+  .blk-figures--row {
     grid-template-columns: 1fr;
   }
 }
@@ -247,7 +281,7 @@
 
 /* Карта или схема: показываем целиком, обрезка съела бы заголовок и легенду */
 .blk-figure--contain .zoom img {
-  aspect-ratio: auto;
+  aspect-ratio: var(--img-ratio, auto);
   object-fit: contain;
   background: var(--surface);
 }
@@ -303,7 +337,7 @@
 }
 
 .blk-figure--plate .zoom img {
-  aspect-ratio: auto;
+  aspect-ratio: var(--img-ratio, auto);
   object-fit: contain;
   width: auto;
   max-width: 100%;
