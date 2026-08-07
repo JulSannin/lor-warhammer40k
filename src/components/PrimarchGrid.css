@@ -12,9 +12,15 @@
   color: var(--accent);
 }
 
+/*
+ * Пять карточек в ряд — четыре ряда ровно на двадцать примархов.
+ * Число колонок задано жёстко, а не auto-fill: при автоподборе ряд
+ * то и дело выходил четырёхкарточным, и последняя строка оставалась
+ * рваной. Легионов всегда двадцать, так что делить их на пять безопасно.
+ */
 .pg__list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 1.25rem 1rem;
   margin: 0;
   padding: 0;
@@ -116,9 +122,20 @@
   color: #3f8fd4;
 }
 
-@media (max-width: 520px) {
+/*
+ * На узких экранах пятёрка не помещается: карточка ужимается до
+ * нечитаемого. Спускаемся по делителям двадцати — 4, 2, — чтобы
+ * последний ряд всегда оставался полным.
+ */
+@media (max-width: 900px) {
   .pg__list {
-    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .pg__list {
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem 0.75rem;
   }
 }

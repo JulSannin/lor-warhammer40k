@@ -67,7 +67,9 @@ export const allImages: SectionImage[] = sections.flatMap(inPageOrder)
  * дёргался, когда виртуализатор заменяет оценку измерением. Замеры точнее
  * любой формулы, а состав лора меняется редко.
  *
- * Если правили WARHAMMER_40K_LORE.md и высоты уехали, перемерить так:
+ * Перемерять нужно не только после правки лора, но и после любой правки
+ * раскладки — числа колонок в галерее примархов, сетки картинок, отступов.
+ * Делается так:
  * открыть сайт, прокрутить до конца и выполнить в консоли
  *   `Object.fromEntries([...document.querySelectorAll('.section')]
  *      .map(s => [s.id, Math.round(s.getBoundingClientRect().height)]))`
@@ -76,16 +78,16 @@ export const allImages: SectionImage[] = sections.flatMap(inPageOrder)
  */
 const MEASURED: Record<string, number> = {
   'war-in-heaven': 6952,
-  'eldar-fall': 5067,
+  'eldar-fall': 6538,
   'pre-imperium': 3277,
-  'emperor-crusade': 8643,
-  'horus-heresy': 7502,
+  'emperor-crusade': 9403,
+  'horus-heresy': 7741,
   'ten-thousand-years': 7332,
   chaos: 5964,
   xenos: 6871,
-  indomitus: 6120,
+  indomitus: 7004,
   thesis: 2251,
-  disputed: 5095,
+  disputed: 5111,
 }
 
 /** Запасная оценка для раздела, которого ещё нет в таблице замеров. */
