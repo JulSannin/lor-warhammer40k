@@ -86,10 +86,31 @@ function inPageOrder(section: Section): SectionImage[] {
     .filter((i) => i.role === 'inline')
     .slice()
     .sort((a, b) => (a.afterHeading ?? Infinity) - (b.afterHeading ?? Infinity))
-  // Портреты примархов идут следом: в вёрстке они стоят в галерее под
-  // таблицей легионов, и в попапе должны листаться в том же порядке
   const primarchs = section.images.filter((i) => i.role === 'primarch')
-  return [...(section.hero ? [section.hero] : []), ...inline, ...primarchs]
+
+  /*
+   * Галерея примархов встаёт перед таблицей легионов, а не в конце
+   * раздела: значит, и в попапе портреты должны листаться на своём
+   * месте — после картинок, привязанных к предыдущим подзаголовкам,
+   * и перед теми, что идут ниже таблицы. Пока порядок был «портреты
+   * последними», стрелка «вперёд» после портрета Малкадора уводила
+   * не туда, куда смотрел читатель.
+   */
+  let headingsBeforeTable = Infinity
+  if (primarchs.length > 0) {
+    let headings = 0
+    for (const block of section.blocks) {
+      if (block.type === 'heading') headings += 1
+      if (block.type === 'table' && block.head[0] === '№' && block.head[1] === 'Примарх') {
+        headingsBeforeTable = headings
+        break
+      }
+    }
+  }
+  const before = inline.filter((i) => (i.afterHeading ?? Infinity) < headingsBeforeTable)
+  const after = inline.filter((i) => (i.afterHeading ?? Infinity) >= headingsBeforeTable)
+
+  return [...(section.hero ? [section.hero] : []), ...before, ...primarchs, ...after]
 }
 
 export const allImages: SectionImage[] = sections.flatMap(inPageOrder)
@@ -127,12 +148,12 @@ const MEASURED: Record<string, number>[] = [
     'war-in-heaven': 5922,
     'eldar-fall': 7095,
     'pre-imperium': 2857,
-    'emperor-crusade': 11289,
+    'emperor-crusade': 11309,
     'horus-heresy': 6788,
     'ten-thousand-years': 5467,
     chaos: 3405,
     xenos: 7339,
-    indomitus: 6833,
+    indomitus: 6831,
     thesis: 1694,
     disputed: 3370,
   },
@@ -141,12 +162,12 @@ const MEASURED: Record<string, number>[] = [
     'war-in-heaven': 5376,
     'eldar-fall': 4668,
     'pre-imperium': 2492,
-    'emperor-crusade': 8292,
+    'emperor-crusade': 8312,
     'horus-heresy': 6002,
     'ten-thousand-years': 5599,
     chaos: 4270,
     xenos: 5527,
-    indomitus: 5770,
+    indomitus: 5769,
     thesis: 1768,
     disputed: 4008,
   },
@@ -155,12 +176,12 @@ const MEASURED: Record<string, number>[] = [
     'war-in-heaven': 6966,
     'eldar-fall': 5965,
     'pre-imperium': 3280,
-    'emperor-crusade': 9434,
+    'emperor-crusade': 9454,
     'horus-heresy': 7786,
     'ten-thousand-years': 7345,
     chaos: 5969,
     xenos: 6856,
-    indomitus: 7024,
+    indomitus: 7022,
     thesis: 2252,
     disputed: 5117,
   },
