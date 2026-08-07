@@ -93,7 +93,7 @@ function InlineImage({ image }: { image: SectionImage }) {
   return (
     // Появление на CSS, а не на motion: наблюдателей выходило до шести
     // на раздел, и вся эта работа приходилась на кадр его монтирования
-    <figure className={`blk-figure${image.contain ? ' blk-figure--contain' : ''}`}>
+    <figure className={`blk-figure${image.contain ? ' blk-figure--contain' : ''}${image.plate ? ' blk-figure--plate' : ''}`}>
       <ZoomableImage image={image} />
       <figcaption>{image.caption}</figcaption>
     </figure>

@@ -229,6 +229,15 @@ export function ZoomableImage({
         alt={image.alt}
         width={image.width}
         height={image.height}
+        // У кадров с обрезкой пропорция задана в CSS. У показываемых
+        // целиком её нет, и без этой строки место под картинку не
+        // резервируется: вёрстка прыгает в момент загрузки, а вместе
+        // с ней уезжает и высота раздела.
+        style={
+          image.contain || image.plate
+            ? { aspectRatio: `${image.width} / ${image.height}` }
+            : undefined
+        }
         loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"

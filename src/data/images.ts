@@ -67,6 +67,17 @@ export const images: Record<string, SectionImage[]> = {
   ],
   'eldar-fall': [
     {
+      src: './img/bloody-handed-god.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/e/ea/Bloody-Handed_God.jpg/revision/latest/scale-to-width-down/1600?cb=20110927145831',
+      alt: 'Кхаин, Кровавый Бог',
+      caption: 'Кхаин — бог войны и убийства, чей дар эльдар — ярость. После Падения разбит на осколки-Аватары',
+      role: 'inline',
+      afterHeading: 0,
+      contain: true,
+      width: 833,
+      height: 1390,
+    },
+    {
       src: './img/falloftheeldar.webp',
       remote: 'https://static.wikia.nocookie.net/warhammer40k/images/0/08/FalloftheEldar.jpg/revision/latest/scale-to-width-down/1600?cb=20181029103610&path-prefix=ru',
       alt: 'Падение эльдар',
@@ -764,6 +775,17 @@ export const images: Record<string, SectionImage[]> = {
     },
   ],
   'disputed': [
+    {
+      src: './img/slann-hieroglyphs-sketch.webp',
+      remote: 'https://static.wikia.nocookie.net/warhammer40k/images/6/65/Slann_Hieroglyphs_Sketch.jpg/revision/latest/scale-to-width-down/1600?cb=20160720181446',
+      alt: 'Слаан и иероглифы, Rogue Trader',
+      caption: 'Разворот из Rogue Trader: именно там Слааны были той древней расой, что научила эльдар строить Паутину',
+      role: 'inline',
+      afterHeading: 0,
+      plate: true,
+      width: 1146,
+      height: 810,
+    },
     {
       src: './img/carrionlordoftheimperium.webp',
       remote: 'https://static.wikia.nocookie.net/warhammer40k/images/8/8b/CarrionLordoftheImperium.jpg/revision/latest/scale-to-width-down/1600?cb=20260612174346',

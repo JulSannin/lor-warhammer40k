@@ -76,16 +76,16 @@ export const allImages: SectionImage[] = sections.flatMap(inPageOrder)
  */
 const MEASURED: Record<string, number> = {
   'war-in-heaven': 6952,
-  'eldar-fall': 4465,
+  'eldar-fall': 5067,
   'pre-imperium': 3277,
   'emperor-crusade': 8643,
   'horus-heresy': 7502,
   'ten-thousand-years': 7332,
   chaos: 5964,
   xenos: 6871,
-  indomitus: 6443,
+  indomitus: 6120,
   thesis: 2251,
-  disputed: 4507,
+  disputed: 5095,
 }
 
 /** Запасная оценка для раздела, которого ещё нет в таблице замеров. */

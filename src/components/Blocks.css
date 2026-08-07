@@ -234,3 +234,46 @@
   object-fit: contain;
   background: var(--surface);
 }
+
+/*
+ * Режим contain — для того, что нельзя обрезать: вертикальных портретов
+ * и карт. Кнопка сжимается по картинке, иначе рамка тянулась бы на всю
+ * ширину колонки, а сама картинка сидела бы посередине пустого поля.
+ */
+.blk-figure--contain .zoom {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.blk-figure--contain .zoom img {
+  width: auto;
+  max-width: 100%;
+  max-height: 34rem;
+}
+
+/*
+ * Архивный лист: скан из старого издания нарисован на белом, и на тёмной
+ * теме без оформления это вырвиглазное пятно. Подаём его как документ —
+ * светлая подложка с полями и рамкой, — и белый фон становится частью
+ * замысла, а не браком.
+ */
+.blk-figure--plate .zoom {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+  background: #ddd6c4;
+  border: 1px solid var(--line-strong);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+}
+
+.blk-figure--plate .zoom img {
+  aspect-ratio: auto;
+  object-fit: contain;
+  width: auto;
+  max-width: 100%;
+  max-height: 30rem;
+  background: none;
+  border: none;
+}
