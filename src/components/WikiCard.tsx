@@ -48,6 +48,9 @@ function Article({ article }: { article: WikiArticle }) {
           width={article.thumbWidth}
           height={article.thumbHeight}
           decoding="async"
+          // Карточку открыли по клику — эта картинка нужна сейчас,
+          // а не когда до неё дойдёт очередь предзагрузки
+          fetchPriority="high"
         />
       )}
 
