@@ -6,8 +6,9 @@ import { LightboxProvider } from './components/Lightbox'
 import { Rail } from './components/Rail'
 import { SectionView } from './components/SectionView'
 import { WikiProvider } from './components/WikiCard'
+import { usePrefetchImages } from './hooks/usePrefetchImages'
 import { useScrollSpy } from './hooks/useScrollSpy'
-import { allImages, epigraph, heightBucket, sections, sectionHeights } from './data'
+import { allImages, epigraph, heightBucket, sections, sectionHeights, wiki } from './data'
 import './App.css'
 
 export default function App() {
@@ -92,6 +93,35 @@ export default function App() {
   )
 
   const activeId = useScrollSpy(visibleIds)
+
+  /*
+   * Что подтянуть заранее: кадры собранных разделов и картинки справок
+   * по их терминам.
+   *
+   * Разделов в памяти три — предыдущий, текущий и следующий, — так что
+   * запас всегда ровно вокруг читателя. Кадры соседнего раздела успевают
+   * дойти до того, как он въедет в экран; картинка в карточке термина
+   * перестаёт ждать клика — на домашнем интернете она заставляла ждать
+   * до полутора секунд после нажатия.
+   */
+  const prefetch = useMemo(
+    () => {
+      const urls: string[] = []
+      for (const id of visibleIds) {
+        const section = sections.find((s) => s.id === id)
+        if (!section) continue
+        for (const image of section.images) urls.push(image.src)
+        for (const term of Object.keys(section.wikiFirst))
+          for (const article of wiki[term] ?? [])
+            if (article.thumb) urls.push(`./img/wiki/${article.thumb}`)
+      }
+      return urls
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [visibleIds],
+  )
+
+  usePrefetchImages(prefetch)
 
   /*
    * Доля прочитанного — обычная пиксельная, и теперь она честная: высота
