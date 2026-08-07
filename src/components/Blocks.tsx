@@ -191,7 +191,16 @@ export const Blocks = memo(function Blocks({
       )
     }
 
-    out.push(<BlockView key={`b${i}`} block={block} linkable={linkableByBlock[i]} />)
+    // В таблице легионов ссылок нет: те же двадцать имён стоят строкой
+    // выше в галерее, и справка по ним открывается наведением на карточку.
+    // Двадцать пунктирных подчёркиваний в таблице только рябили бы.
+    out.push(
+      <BlockView
+        key={`b${i}`}
+        block={block}
+        linkable={isPrimarchTable(block) ? undefined : linkableByBlock[i]}
+      />,
+    )
 
     if (block.type === 'heading') {
       headingIndex += 1

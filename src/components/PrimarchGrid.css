@@ -42,6 +42,18 @@
   gap: 0.6rem;
 }
 
+/*
+ * Обёртка со справкой по наведению стоит между карточкой и её
+ * содержимым, поэтому раскладку держит она — иначе портрет и подписи
+ * съезжали бы в строку.
+ */
+.pg__card > .wh {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
 .pg__frame {
   position: relative;
   border-top: 2px solid var(--line-strong);
@@ -102,6 +114,29 @@
   font-size: 0.95rem;
   line-height: 1.25;
   color: var(--bone);
+}
+
+/*
+ * У кого есть статья на вики — пунктир под именем. Тот же знак, что
+ * и у выделенных терминов в тексте: подсказка появится при наведении.
+ */
+.pg__name--wiki {
+  align-self: flex-start;
+  border-bottom: 1px dashed color-mix(in srgb, var(--accent, var(--gold)) 45%, transparent);
+}
+
+.pg__card:hover .pg__name--wiki {
+  border-bottom-color: var(--accent, var(--gold));
+}
+
+/*
+ * Без мыши наведения не существует, справка не открывается — и обещать
+ * её пунктиром нечестно. На таких устройствах имя выглядит как обычное.
+ */
+@media (hover: none) {
+  .pg__name--wiki {
+    border-bottom: none;
+  }
 }
 
 .pg__card.is-erased .pg__name {

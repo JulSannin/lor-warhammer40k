@@ -51,7 +51,8 @@
 
 .wc__card {
   position: relative;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   width: min(54rem, 100%);
   max-height: 100%;
   overflow-y: auto;
@@ -62,26 +63,9 @@
   animation: wc-rise 0.22s var(--ease) both;
 }
 
-/*
- * Вертикальная картинка идёт колонкой слева от текста: 87 из 149
- * заглавных картинок вики — портреты, и общая широкая рамка резала
- * их по глазам. Минимальная высота нужна, чтобы у короткой справки
- * портрет не сплющивался в полоску.
- */
-.wc__card--side {
-  grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
-  min-height: min(26rem, 70vh);
-}
-
-/* Горизонтальная и квадратная — полосой сверху, во всю ширину */
-.wc__card--top,
+/* Тексту без картинки широкая колонка только вредит */
 .wc__card--bare {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-/* Без картинки карточке ни к чему быть широкой — там только текст */
-.wc__card--bare {
-  width: min(34rem, 100%);
+  width: min(36rem, 100%);
 }
 
 @keyframes wc-rise {
@@ -93,7 +77,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .wc,
-  .wc__card {
+  .wc__card,
+  .wh__pop {
     animation: none;
   }
 }
@@ -102,7 +87,7 @@
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  z-index: 1;
+  z-index: 2;
   display: grid;
   place-items: center;
   width: 2.25rem;
@@ -120,6 +105,77 @@
   border-color: var(--gold-dim);
 }
 
+.wc__source {
+  padding: 1rem 4rem 0 clamp(1.25rem, 3vw, 2rem);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-label);
+}
+
+/*
+ * Переключатели статей. Появляются, только когда у термина их больше
+ * одной: «стазис-гробницы» — это и стазис, и некроны, и ни одна статья
+ * по отдельности термин не объясняет.
+ */
+.wc__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.85rem clamp(1.25rem, 3vw, 2rem) 0;
+}
+
+.wc__tab {
+  padding: 0.35rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--line-strong);
+  cursor: pointer;
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease),
+    background 0.2s var(--ease);
+}
+
+.wc__tab:hover {
+  color: var(--bone);
+  border-color: var(--gold-dim);
+}
+
+.wc__tab.is-active {
+  color: var(--void);
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+/* ---------------- Статья внутри карточки ---------------- */
+
+.wc__article {
+  display: grid;
+  margin-top: 1rem;
+}
+
+/*
+ * Вертикальная картинка идёт колонкой слева от текста: больше половины
+ * заглавных картинок вики — портреты, и общая широкая рамка резала их
+ * по глазам. Минимальная высота нужна, чтобы у короткой справки портрет
+ * не сплющивался в полоску.
+ */
+.wc__article--side {
+  grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+  min-height: min(24rem, 62vh);
+}
+
+/* Горизонтальная, квадратная и отсутствующая — в одну колонку */
+.wc__article--top,
+.wc__article--bare {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .wc__thumb {
   width: 100%;
   object-fit: cover;
@@ -127,17 +183,26 @@
 }
 
 /* Портрет заполняет свою колонку целиком, от края до края карточки */
-.wc__card--side .wc__thumb {
+.wc__article--side .wc__thumb {
   height: 100%;
   min-height: 100%;
   border-right: 1px solid var(--line);
 }
 
 /* Пейзаж — полосой сверху; 21 к 9 не даёт ей съесть половину экрана */
-.wc__card--top .wc__thumb {
+.wc__article--top .wc__thumb {
   height: auto;
   aspect-ratio: 21 / 9;
-  border-bottom: 1px solid var(--line);
+  border-block: 1px solid var(--line);
+}
+
+/*
+ * Картинка мельче рамки — показываем в натуральную величину по центру.
+ * scale-down делает ровно это: уменьшает, если не влезает, но никогда
+ * не растягивает. Без него «Джокаеро» 500×499 раздувало до 862 в ширину.
+ */
+.wc__thumb--small {
+  object-fit: scale-down;
 }
 
 /*
@@ -153,23 +218,14 @@
 }
 
 /*
- * Картинка мельче рамки — показываем в натуральную величину по центру.
- * scale-down делает ровно это: уменьшает, если не влезает, но никогда
- * не растягивает. Без него «Джокаеро» 500×499 раздувало до 862 в ширину.
- */
-.wc__thumb--small {
-  object-fit: scale-down;
-}
-
-/*
  * Светлая картинка в верхней полосе живёт по своей пропорции: общая
  * рамка 21:9 оставляла вокруг вытянутой схемы широкие поля пергамента
  * и раздувала карточку впустую.
  */
-.wc__card--top .wc__thumb--light {
+.wc__article--top .wc__thumb--light {
   aspect-ratio: auto;
   height: auto;
-  max-height: 46vh;
+  max-height: 42vh;
 }
 
 .wc__body {
@@ -179,13 +235,8 @@
   padding: clamp(1.25rem, 3vw, 2rem);
 }
 
-.wc__source {
-  margin-bottom: 0.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--gold-label);
+.wc__article--bare .wc__body {
+  padding-top: 0;
 }
 
 .wc__title {
@@ -198,30 +249,6 @@
 .wc__extract {
   font-size: 1.05rem;
   color: var(--text);
-}
-
-/*
- * На узком экране колонки рядом не помещаются — картинка уходит
- * наверх. Ограничение по высоте важнее пропорции: вертикальный портрет
- * во всю ширину телефона занял бы полтора экрана, и до текста пришлось
- * бы прокручивать.
- */
-@media (max-width: 46rem) {
-  .wc__card--side {
-    grid-template-columns: minmax(0, 1fr);
-    min-height: 0;
-  }
-
-  .wc__card--side .wc__thumb {
-    height: 40vh;
-    min-height: 0;
-    border-right: none;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .wc__card--top .wc__thumb {
-    aspect-ratio: 16 / 9;
-  }
 }
 
 .wc__link {
@@ -240,4 +267,131 @@
 .wc__link:focus-visible {
   color: var(--gold-bright);
   text-decoration-color: currentColor;
+}
+
+/*
+ * На узком экране колонки рядом не помещаются — картинка уходит
+ * наверх. Ограничение по высоте важнее пропорции: вертикальный портрет
+ * во всю ширину телефона занял бы полтора экрана, и до текста пришлось
+ * бы прокручивать.
+ */
+@media (max-width: 46rem) {
+  .wc__article--side {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .wc__article--side .wc__thumb {
+    height: 38vh;
+    min-height: 0;
+    border-right: none;
+    border-block: 1px solid var(--line);
+  }
+
+  .wc__article--top .wc__thumb {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* ---------------- Справка по наведению ---------------- */
+
+/*
+ * Всплывающая справка для карточек примархов. Не модальное окно:
+ * галерею просматривают глазами, и останавливать это окном на каждый
+ * портрет было бы навязчиво. Картинки внутри нет — портрет читатель
+ * и так видит перед собой.
+ */
+.wh {
+  position: relative;
+}
+
+.wh__pop {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 50%;
+  z-index: 40;
+  width: min(22rem, 80vw);
+  padding: 0.9rem 1rem;
+  translate: -50% 0;
+  background: var(--surface);
+  border: 1px solid var(--gold-dim);
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 0.7);
+  animation: wh-in 0.14s var(--ease) both;
+}
+
+/*
+ * Мостик через зазор между карточкой и подсказкой. Без него курсор,
+ * идущий к ссылке «читать на вики», на полпути покидал карточку —
+ * и подсказка исчезала прямо из-под руки.
+ */
+.wh__pop::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: -0.6rem;
+  height: 0.6rem;
+}
+
+.wh__pop--up::before {
+  top: auto;
+  bottom: -0.6rem;
+}
+
+/* У нижнего края экрана раскрывается вверх, иначе её просто не видно */
+.wh__pop--up {
+  top: auto;
+  bottom: calc(100% + 0.5rem);
+}
+
+@keyframes wh-in {
+  from {
+    opacity: 0;
+    translate: -50% 4px;
+  }
+}
+
+.wh__item + .wh__item {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.wh__title {
+  margin-bottom: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-label);
+}
+
+/*
+ * Подсказка при наведении — не место для полотна текста: семь строк,
+ * дальше многоточие и ссылка на статью. Заодно это держит высоту
+ * предсказуемой, а от неё зависит, вверх или вниз она раскроется.
+ */
+.wh__extract {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 7;
+  overflow: hidden;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.wh__link {
+  display: inline-block;
+  margin-top: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+}
+
+/* На устройствах без мыши наведения нет — подсказка не нужна */
+@media (hover: none) {
+  .wh__pop {
+    display: none;
+  }
 }
