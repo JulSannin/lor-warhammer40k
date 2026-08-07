@@ -41,6 +41,22 @@ export function WikiProvider({ children }: { children: ReactNode }) {
   const api = useMemo(() => ({ open }), [open])
   const entry = term === null ? null : wiki[term]
 
+  /*
+   * Раскладка выбирается по форме картинки, а не одна на всех.
+   * Из 149 заглавных картинок вики 87 вертикальные: портреты примархов,
+   * богов, персонажей. Общая широкая рамка резала их по глазам, поэтому
+   * вертикальные встают колонкой сбоку от текста, а горизонтальные —
+   * полосой сверху, как и положено пейзажу.
+   */
+  const portrait = !!entry?.thumb && entry.thumbHeight! > entry.thumbWidth! * 1.15
+
+  /*
+   * У двух десятков статей заглавная картинка мельче, чем рамка карточки.
+   * Растягивать её нельзя — выходит мыло, поэтому такие показываем в их
+   * собственном размере по центру рамки.
+   */
+  const smallThumb = !!entry?.thumb && Math.max(entry.thumbWidth!, entry.thumbHeight!) < 560
+
   return (
     <WikiContext.Provider value={api}>
       {children}
@@ -55,7 +71,11 @@ export function WikiProvider({ children }: { children: ReactNode }) {
             if (e.target === e.currentTarget) close()
           }}
         >
-          <article className="wc__card">
+          <article
+            className={`wc__card wc__card--${portrait ? 'side' : 'top'}${
+              entry.thumb ? '' : ' wc__card--bare'
+            }`}
+          >
             <button
               type="button"
               className="wc__close"
@@ -69,7 +89,9 @@ export function WikiProvider({ children }: { children: ReactNode }) {
 
             {entry.thumb && (
               <img
-                className={`wc__thumb${entry.lightThumb ? ' wc__thumb--light' : ''}`}
+                className={`wc__thumb${entry.lightThumb ? ' wc__thumb--light' : ''}${
+                  smallThumb ? ' wc__thumb--small' : ''
+                }`}
                 src={`./img/wiki/${entry.thumb}`}
                 alt=""
                 width={entry.thumbWidth}

@@ -114,9 +114,46 @@ const ALIASES = {
   'стазис-гробницы': 'Некроны',
   некродермиса: "К'тан",
   'Культы Наслаждения': 'Тёмные эльдар',
-  '13 Чёрных Крестовых Походов': 'Чёрный крестовый поход',
+  // «Чёрный крестовый поход» — перенаправление на настольную игру
+  '13 Чёрных Крестовых Походов': 'Чёрные крестовые походы',
+
+  // Войны за Армагеддон: в таблице лора они названы одними порядковыми
+  // числительными, и сами по себе эти слова не значат ничего
+  Первая: 'Первая война за Армагеддон',
+  Вторая: 'Вторая война за Армагеддон',
+  Третья: 'Третья война за Армагеддон',
+
+  /*
+   * Термины, которые поиск угадывал верно, но правило похожести их
+   * не пропускает: слишком далеко от названия статьи. Проверен каждый.
+   */
+  'стазис-поле': 'Стазис',
+  'Война в Небесах': 'Война в Небесах (некроны)',
+  'Архео-технологии': 'Археотех',
+  'Альфарий и Омегон': 'Альфарий',
+  'Альфарий / Омегон': 'Альфарий',
+  'Тразин Неисчислимый': 'Тразин',
+  'Тразина Неисчислимого': 'Тразин',
+  'Газгкулл Маг Урук Трака': 'Газгкулл',
+  'Орикан Прорицатель': 'Орикан',
+  'Адепта Сороритас — Сёстры Битвы': 'Адепта Сороритас',
+  'Хоруса Военным Магистром': 'Хорус',
+  'Иша попала в плен к Нурглу': 'Иша',
+  'Тёмные эльдар (Друкари)': 'Тёмные эльдар',
+  // В лоре апостроф прямой, а не типографский — ключ должен совпадать точно
+  "Лев Эль'Джонсон вернулся": "Лев Эль'Джонсон",
+  некронами: 'Некроны',
+  'Ультве, Биэль-Тан, Сайм-Ханн, Иянден, Алайток': 'Ультве',
+  'Феррус Манус был обезглавлен собственным братом Фулгримом.': 'Феррус Манус',
+  'Империум человечества — фашистская, некомпетентная, суеверная машина по перемалыванию собственных граждан':
+    'Империум Человечества',
 
   // Статьи не существует — проверено, не искать
+  // «ужас» — это чувство Жиллимана, а не демоны Тзинча,
+  // «пробуждён» — про его пробуждение, а не про фракцию «Пробуждённые»
+  ужас: null,
+  пробуждён: null,
+  Четвёртая: null,
   Крорки: null,
   Биотрансференция: null,
   Кхур: null,
@@ -173,7 +210,6 @@ const LIGHT_THUMBS = new Set([
   'Паутина',
   'Сланны',
   'Тёмные эльдар',
-  'Ужасы Тзинча',
   'Фаланга',
   'Чернокаменная крепость',
   'Экклезиархия',
@@ -268,6 +304,8 @@ async function resolveTitles(terms) {
     for (const r of data.query.redirects ?? []) back.set(r.to, back.get(r.from) ?? r.from)
     for (const page of Object.values(data.query.pages)) {
       if (page.missing !== undefined) continue
+      // Перенаправление тоже способно увести к статье о книге или игре
+      if (isMedia(page.title)) continue
       canonical.set(back.get(page.title) ?? page.title, page.title)
     }
   }
@@ -285,11 +323,6 @@ async function resolveTitles(terms) {
   }
 
   // Поиск для остатка
-  const norm = (s) =>
-    s
-      .toLowerCase()
-      .replace(/ё/g, 'е')
-      .replace(/[^\p{L}\p{N}]/gu, '')
   for (const term of stillMissing) {
     const data = await api({
       action: 'query',
@@ -298,17 +331,66 @@ async function resolveTitles(terms) {
       srsearch: term,
     })
     const hit = data.query?.search?.[0]
-    if (!hit) continue
-    const a = norm(hit.title)
-    const b = norm(term)
-    const close =
-      a === b ||
-      a.startsWith(b.slice(0, Math.max(5, b.length - 3))) ||
-      b.startsWith(a.slice(0, Math.max(5, a.length - 3)))
-    if (close) good.set(term, hit.title)
+    if (!hit || isMedia(hit.title)) continue
+    if (sameThing(term, hit.title)) good.set(term, hit.title)
   }
 
   return { titles: good, skipped: skip }
+}
+
+const norm = (s) =>
+  s
+    .toLowerCase()
+    .replace(/ё/g, 'е')
+    .replace(/[^\p{L}\p{N}]/gu, '')
+
+/**
+ * Статья о книге, игре или фильме, а не о лоре.
+ *
+ * Ловушка настоящая: «Чёрный крестовый поход» на вики — перенаправление
+ * на статью о настольной ролевой игре, а не на походы Абаддона.
+ */
+const isMedia = (title) =>
+  /\((роман|повесть|новелла|сборник рассказов|ролевая игра|игра|фильм|комикс|аудиокнига|серия книг)\)/i.test(
+    title,
+  )
+
+/** Расстояние Левенштейна, обычная динамика по строке. */
+function distance(a, b) {
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j)
+  for (let i = 1; i <= a.length; i++) {
+    const row = [i]
+    for (let j = 1; j <= b.length; j++) {
+      row[j] = Math.min(
+        prev[j] + 1,
+        row[j - 1] + 1,
+        prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+      )
+    }
+    prev = row
+  }
+  return prev[b.length]
+}
+
+/**
+ * Считать ли найденное поиском название тем же самым понятием.
+ *
+ * Правило узкое намеренно. Прежнее — «одно начинается с другого» —
+ * пропускало подмены: «ужас» из фразы про Жиллимана уезжал в «Ужасы
+ * Тзинча», а «Первая» из таблицы войн за Армагеддон — в роман «Первая
+ * стена». Теперь допускается только разница в окончании: слово в
+ * косвенном падеже против именительного, «Джокаэро» против «Джокаеро».
+ *
+ * Всё остальное, что поиск угадал верно, разобрано вручную в ALIASES:
+ * пусть лучше связей будет меньше, но ни одна не уведёт не туда.
+ */
+function sameThing(term, title) {
+  const a = norm(term)
+  const b = norm(title)
+  if (a === b) return true
+  // Короткие слова слишком легко совпадают случайно
+  if (Math.min(a.length, b.length) < 6) return false
+  return distance(a, b) <= 2
 }
 
 const ENTITIES = {
@@ -510,8 +592,13 @@ async function main() {
       api({
         action: 'query',
         prop: 'pageimages',
-        piprop: 'thumbnail',
-        pithumbsize: '260',
+        // Размер оригинала нужен, чтобы не брать растянутое: вики
+        // послушно увеличивает мелкую картинку до запрошенного размера,
+        // и «Древние» из 260×75 превращались в мыльные 800×229
+        piprop: 'thumbnail|original',
+        // 800 по длинной стороне. Раньше стояло 260 — при ширине
+        // карточки в 800 пикселей такая миниатюра растягивалась втрое
+        pithumbsize: '800',
         titles: title,
       }),
     ])
@@ -532,13 +619,18 @@ async function main() {
       continue
     }
     const page = Object.values(info.query.pages)[0]
+    // Оригинал меньше запрошенного — берём его, а не растянутую копию
+    const orig = page?.original
+    const small = orig && Math.max(orig.width, orig.height) <= 800
+    const pic = small ? orig : page?.thumbnail
+
     // Несколько терминов ведут в одну статью (четыре касты тау — в одну);
-    // миниатюру такой статьи качаем один раз
+    // картинку такой статьи качаем один раз
     let thumb = null
-    if (page?.thumbnail) {
+    if (pic) {
       thumb = thumbCache.get(title)
       if (thumb === undefined) {
-        thumb = await fetchThumb(page.thumbnail.source, title)
+        thumb = await fetchThumb(pic.source, title)
         thumbCache.set(title, thumb)
       }
     }
@@ -548,8 +640,8 @@ async function main() {
       ...(thumb
         ? {
             thumb,
-            thumbWidth: page.thumbnail.width,
-            thumbHeight: page.thumbnail.height,
+            thumbWidth: pic.width,
+            thumbHeight: pic.height,
             ...(LIGHT_THUMBS.has(title) ? { lightThumb: true } : {}),
           }
         : {}),
