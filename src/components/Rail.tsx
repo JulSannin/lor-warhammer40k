@@ -7,8 +7,11 @@ interface RailProps {
   sections: Section[]
   activeId: string | null
   progress: number
-  /** Положение бегунка на шкале: доля не по пикселям, а по разделам. */
-  railPosition: number
+  /**
+   * Шкала: `passed` — доля разделов позади, `position` — она же плюс
+   * движение внутри текущего. Обе по разделам, а не по пикселям.
+   */
+  rail: { passed: number; position: number }
   /** Панель закреплена — контент сдвигается, а не перекрывается. */
   pinned: boolean
   onPinnedChange: (pinned: boolean) => void
@@ -31,7 +34,7 @@ export function Rail({
   sections,
   activeId,
   progress,
-  railPosition,
+  rail,
   pinned,
   onPinnedChange,
 }: RailProps) {
@@ -116,11 +119,14 @@ export function Rail({
 
           {/*
             Шкала прочитанного идёт вдоль римских цифр и ровно на их высоту.
-            Раньше это была отдельная короткая полоска под ними: она честно
-            показывала долю, но ни с чем не соотносилась — по ней нельзя
-            было понять, докуда дочитал. Теперь заполненная часть
-            останавливается напротив номера раздела, который сейчас на
-            экране, и полоса читается как линейка, а не как украшение.
+            Раньше это была короткая полоска под ними: долю она показывала
+            честно, но ни с чем не соотносилась — по ней нельзя было понять,
+            докуда дочитал.
+
+            Полос две. Тусклая — сколько разделов позади, она доходит
+            до цифры текущего. Яркая с бегунком на конце — движение внутри
+            текущего раздела; она и оживает при обычной прокрутке, тогда
+            как общая доля за целый раздел сдвигается всего на одну цифру.
           */}
           <div className="rail__gauge">
             <div className="rail__gauge-row">
@@ -133,8 +139,15 @@ export function Rail({
                 aria-valuemax={100}
               >
                 <div
-                  className="rail__progress-fill"
-                  style={{ height: `${railPosition * 100}%` }}
+                  className="rail__progress-past"
+                  style={{ height: `${rail.passed * 100}%` }}
+                />
+                <div
+                  className="rail__progress-now"
+                  style={{
+                    top: `${rail.passed * 100}%`,
+                    height: `${(rail.position - rail.passed) * 100}%`,
+                  }}
                 />
               </div>
 
@@ -163,8 +176,6 @@ export function Rail({
               </ul>
             </div>
           </div>
-
-          <span className="rail__percent">{Math.round(progress * 100)}</span>
         </div>
 
         {/*

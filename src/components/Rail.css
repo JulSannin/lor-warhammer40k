@@ -52,17 +52,35 @@
   display: flex;
   align-items: stretch;
   gap: 0.5rem;
-  max-height: 100%;
+  /*
+   * Шкала занимает всю свободную высоту полосы, а не только высоту
+   * цифр: чем длиннее шкала, тем длиннее клетка раздела и тем заметнее
+   * ход бегунка. Потолок нужен на высоких экранах — иначе одиннадцать
+   * цифр расползаются по метру пустоты.
+   */
+  height: 100%;
+  max-height: 42rem;
 }
 
+/*
+ * Каждой цифре — своя клетка в одну одиннадцатую высоты. Тогда отрезок
+ * текущего раздела занимает ровно клетку своей цифры, и бегунок проходит
+ * её от края до края, пока раздел читается.
+ */
 .rail__marks {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 0.15rem;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.rail__marks li {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 0;
 }
 
 /* С мышью — индикатор, а не кнопка: клики по свёрнутой полосе не
@@ -104,41 +122,58 @@ a.rail__mark:active {
 .rail__progress {
   position: relative;
   flex: none;
-  width: 2px;
+  width: 3px;
   background: var(--line-strong);
-  border-radius: 1px;
+  border-radius: 2px;
 }
 
-.rail__progress-fill {
-  position: relative;
+/* Разделы позади: тусклая заливка от начала шкалы до текущей цифры */
+.rail__progress-past {
+  position: absolute;
+  top: 0;
   width: 100%;
-  background: linear-gradient(to bottom, var(--gold-dim), var(--gold));
-  border-radius: 1px;
+  background: var(--gold-dim);
+  border-radius: 2px;
 }
 
 /*
- * Точка на конце заливки — та самая «где я сейчас». Без неё край
- * градиента теряется на тёмном фоне, и шкала опять читается как
- * просто линия.
+ * Текущий раздел: яркий отрезок в его клетке шкалы. Он и оживает при
+ * обычной прокрутке — за целый раздел общая доля сдвигается всего
+ * на одну цифру из одиннадцати, а этот отрезок за то же время
+ * проходит свою клетку целиком.
  */
-.rail__progress-fill::after {
-  content: '';
+.rail__progress-now {
   position: absolute;
-  bottom: -2px;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  translate: -50% 0;
-  background: var(--gold);
-  border-radius: 50%;
-  box-shadow: 0 0 6px rgb(200 165 75 / 0.6);
+  width: 100%;
+  background: linear-gradient(to bottom, var(--gold), var(--gold-bright));
+  border-radius: 2px;
+  /* Плавный ход: прокрутка приходит рывками, и без этого бегунок скачет */
+  transition:
+    top 0.15s linear,
+    height 0.15s linear;
 }
 
-.rail__percent {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  color: var(--faint);
-  font-variant-numeric: tabular-nums;
+@media (prefers-reduced-motion: reduce) {
+  .rail__progress-now {
+    transition: none;
+  }
+}
+
+/*
+ * Бегунок на конце — та самая «где я сейчас». Без него край градиента
+ * теряется на тёмном фоне, и шкала опять читается как просто линия.
+ */
+.rail__progress-now::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  translate: -50% 0;
+  background: var(--gold-bright);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgb(230 200 119 / 0.75);
 }
 
 /* ---------------- Раскрытая панель ---------------- */
