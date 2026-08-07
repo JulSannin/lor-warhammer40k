@@ -9,15 +9,48 @@ import { useEffect } from 'react'
  * разделов и картинки справок по терминам этих разделов. К моменту,
  * когда читатель туда доберётся или откроет карточку, файл уже в кеше.
  *
- * Загрузка идёт в простое браузера и с низким приоритетом, чтобы не
- * соперничать с тем, что нужно показать прямо сейчас.
+ * Очередь одна на всё приложение, и это принципиально. Сначала предел
+ * в четыре файла стоял на каждый запуск: при быстрой прокрутке запусков
+ * набирался десяток, в полёте оказывалось под сорок запросов разом, и
+ * картинка открытой карточки делила канал со всеми — появлялась через
+ * секунды. Общая очередь держит ровно четыре, сколько бы разделов
+ * читатель ни пролистал.
  */
 
 /** Уже запрошенные адреса: второй раз не просим даже после перемонтирования. */
 const asked = new Set<string>()
 
-/** Сколько картинок тянем одновременно. */
+/** Сколько картинок тянем одновременно — на всё приложение, а не на вызов. */
 const PARALLEL = 4
+
+const queue: string[] = []
+let active = 0
+
+function pump() {
+  while (active < PARALLEL && queue.length > 0) {
+    const url = queue.shift()!
+    active += 1
+    const img = new Image()
+    /*
+     * Приоритет обычный, а не низкий, — и это важнее, чем кажется.
+     * Браузер склеивает запросы одного адреса, и с низким приоритетом
+     * карточка, открытая по клику, вставала в хвост уже начатой фоновой
+     * загрузке. Сдержанность обеспечивает очередь, а не приоритет.
+     */
+    img.decoding = 'async'
+    const done = () => {
+      active -= 1
+      pump()
+    }
+    img.onload = done
+    img.onerror = () => {
+      // Не получилось — пусть обычная загрузка попробует ещё раз
+      asked.delete(url)
+      done()
+    }
+    img.src = url
+  }
+}
 
 type Idle = (cb: () => void) => number
 const idle: Idle =
@@ -48,61 +81,30 @@ export function usePrefetchImages(urls: string[]) {
   useEffect(() => {
     if (!allowed()) return
 
-    const queue = urls.filter((u) => u && !asked.has(u))
-    if (queue.length === 0) return
-    queue.forEach((u) => asked.add(u))
+    const fresh = urls.filter((u) => u && !asked.has(u))
+    if (fresh.length === 0) return
+    fresh.forEach((u) => asked.add(u))
 
-    let cancelled = false
-    const pending = new Set<HTMLImageElement>()
-
-    const next = () => {
-      if (cancelled) return
-      const url = queue.shift()
-      if (!url) return
-      const img = new Image()
-      pending.add(img)
-      /*
-       * Приоритет обычный, а не низкий, — и это важнее, чем кажется.
-       *
-       * С низким выходило хуже, чем без предзагрузки вовсе: браузер
-       * склеивает запросы одного адреса, и карточка, открытая по клику,
-       * вставала в хвост уже начатой ленивой загрузке. Картинка не
-       * появлялась секундами. Сдержанность обеспечивает очередь на
-       * четыре файла, а не приоритет.
-       */
-      img.decoding = 'async'
-      const done = () => {
-        pending.delete(img)
-        next()
-      }
-      img.onload = done
-      img.onerror = () => {
-        // Не получилось — пусть обычная загрузка попробует ещё раз
-        asked.delete(url)
-        done()
-      }
-      img.src = url
-    }
-
+    // В начало очереди: читатель сейчас здесь, а не там, где был
     const handle = idle(() => {
-      for (let i = 0; i < PARALLEL; i++) next()
+      queue.unshift(...fresh)
+      pump()
     })
 
     return () => {
-      cancelled = true
       /*
-       * Начатое не обрываем, только перестаём следить.
-       *
-       * Сброс `img.src` действительно прекращает загрузку, но потом
-       * этот адрес не грузится вовсе: карточка «Древних» открывалась
-       * с пустым кадром, если её картинку успели начать и бросить.
-       * Недокачанный файл — это несколько десятков килобайт низкого
-       * приоритета; дать им дойти дешевле, чем сломать картинку.
+       * Уже начатое не обрываем, только вынимаем из очереди то, что
+       * ещё не стартовало. Сброс `img.src` действительно прекращает
+       * загрузку, но после него этот адрес не грузится вовсе: карточка
+       * открывалась с пустым кадром, если её картинку успели бросить.
        */
-      pending.forEach((img) => {
-        img.onload = null
-        img.onerror = null
-      })
+      for (const url of fresh) {
+        const at = queue.indexOf(url)
+        if (at !== -1) {
+          queue.splice(at, 1)
+          asked.delete(url)
+        }
+      }
       if (typeof cancelIdleCallback === 'function') cancelIdleCallback(handle)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
