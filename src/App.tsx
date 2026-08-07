@@ -110,28 +110,39 @@ export default function App() {
   }, [virtualizer.scrollOffset, totalSize, listTop])
 
   /*
-   * Положение бегунка на шкале в боковой полосе — доля не пиксельная,
-   * а по разделам: номер текущего плюс то, сколько от него пройдено.
+   * Шкала в боковой полосе. Два числа, потому что она отвечает сразу
+   * на два вопроса.
    *
-   * Пиксельная доля тут не годится. Шкала идёт вдоль римских цифр, а
-   * цифры расставлены равномерно, тогда как разделы разной длины:
-   * «Крестовый поход» вдвое длиннее «Главной мысли». На пиксельной доле
-   * бегунок промахивался мимо активного номера на одну позицию — и вся
-   * затея со шкалой-линейкой рассыпалась. Процент под шкалой остаётся
-   * пиксельным: он отвечает на другой вопрос — сколько текста позади.
+   * `passed` — сколько разделов позади: это тусклая заливка от начала
+   * шкалы до цифры текущего раздела. `position` — то же плюс движение
+   * внутри текущего раздела: яркий отрезок с бегунком на конце.
+   *
+   * Доля именно по разделам, а не по пикселям. Цифры на шкале
+   * расставлены равномерно, а разделы разной длины — «Крестовый поход»
+   * вчетверо длиннее «Главной мысли». На пиксельной доле бегунок
+   * промахивался бы мимо активной цифры, и вся затея со шкалой-линейкой
+   * рассыпалась бы.
    */
-  const railPosition = useMemo(() => {
+  const rail = useMemo(() => {
     const index = sections.findIndex((s) => s.id === activeId)
-    if (index === -1) return progress < 0.5 ? 0 : 1
+    if (index === -1) {
+      const edge = progress < 0.5 ? 0 : 1
+      return { passed: edge, position: edge }
+    }
 
     const el = document.getElementById(sections[index].id)
     let within = 0
     if (el) {
       const rect = el.getBoundingClientRect()
+      // Сколько ещё прокручивать до конца раздела. У раздела короче
+      // экрана прокручивать нечего — считаем его пройденным сразу.
       const passable = rect.height - window.innerHeight
       if (passable > 0) within = Math.min(1, Math.max(0, -rect.top / passable))
     }
-    return (index + within) / sections.length
+    return {
+      passed: index / sections.length,
+      position: (index + within) / sections.length,
+    }
   }, [activeId, progress])
 
   /**
@@ -246,7 +257,7 @@ export default function App() {
               sections={sections}
               activeId={activeId}
               progress={progress}
-              railPosition={railPosition}
+              rail={rail}
               pinned={pinned}
               onPinnedChange={setPinned}
             />
