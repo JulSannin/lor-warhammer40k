@@ -181,10 +181,27 @@
   margin-top: 2rem !important;
 }
 
+/*
+ * Группа картинок под одним подзаголовком: строго две в ряд.
+ * Если картинок нечётное число, последняя занимает ряд целиком —
+ * иначе рядом с ней оставалась бы дыра в половину ширины. При
+ * auto-fit три картинки вставали в один ряд и мельчали втрое.
+ */
 .blk-figures--pair {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.blk-figures--pair > .blk-figure:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+/* Ниже 34rem половина колонки уже уже читаемого кадра — ставим в столбик */
+@media (max-width: 34rem) {
+  .blk-figures--pair {
+    grid-template-columns: 1fr;
+  }
 }
 
 .blk-figure {
@@ -239,7 +256,24 @@
  * Режим contain — для того, что нельзя обрезать: вертикальных портретов
  * и карт. Кнопка сжимается по картинке, иначе рамка тянулась бы на всю
  * ширину колонки, а сама картинка сидела бы посередине пустого поля.
+ *
+ * Подпись идёт следом по центру: картинка тут уже колонки, и подпись,
+ * прижатая к левому краю, отрывалась от неё — особенно у портрета,
+ * занявшего ряд целиком.
  */
+.blk-figure--contain,
+.blk-figure--plate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.blk-figure--contain figcaption,
+.blk-figure--plate figcaption {
+  max-width: min(100%, 34rem);
+  text-align: center;
+}
+
 .blk-figure--contain .zoom {
   width: fit-content;
   max-width: 100%;

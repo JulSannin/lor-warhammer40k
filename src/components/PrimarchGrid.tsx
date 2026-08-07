@@ -40,7 +40,10 @@ export const PrimarchGrid = memo(function PrimarchGrid({
               : 'unknown'
 
           return (
-            <li key={num} className={`pg__card pg__card--${verdict}${erased ? ' is-erased' : ''}`}>
+            <li
+              key={num}
+              className={`pg__card pg__card--${verdict}${erased ? ' is-erased' : ''}`}
+            >
               <div className="pg__frame">
                 {img ? (
                   <ZoomableImage image={img} />
