@@ -64,19 +64,19 @@ const ALIASES = {
   Иврейн: 'Иврайна',
   'Белизарий Каул': 'Велизарий Коул',
   'Примарис-космодесантников': 'Космодесант Примарис',
-  'Кадианские Врата': 'Кадия',
+  'Кадианские Врата': ['Кадия', 'Кадианские пилоны'],
   Эфириалы: 'Кастовая система тау',
   'Крестовый Поход Индомитус': 'Неодолимый крестовый поход',
   Слааны: 'Сланны',
-  'Инари (Ynnari)': 'Иннари',
+  'Инари (Ynnari)': ['Иннари', 'Иннеад'],
   'Малал / Малис': 'Злоба',
   'Магистр Администратума': 'Администратум',
   'Пария-Нексус': 'Звено-Пария',
   'Вашторр Архифан': 'Вашторр',
   'Олланий Пий': 'Вечные',
   'Олланий Перссон, «вечный»': 'Вечные',
-  Скалу: 'Скала (Калибан)',
-  Скале: 'Скала (Калибан)',
+  Скалу: ['Скала (Калибан)', 'Тёмные Ангелы'],
+  Скале: ['Скала (Калибан)', 'Тёмные Ангелы'],
   'Чёрный Камень-Крепость «Воля Вечности»': 'Чернокаменная крепость',
   'уничтожил сеть Пилонов': 'Кадианские пилоны',
   'II и XI легионы': 'Расколотые легионы',
@@ -109,13 +109,15 @@ const ALIASES = {
   Вода: 'Кастовая система тау',
   'луне Давина': 'Давин',
   'Разумом Улья': 'Разум Улья',
-  'Тень в Варпе': 'Тираниды',
+  'Тень в Варпе': ['Тираниды', 'Разум Улья'],
   спорами: 'Тираниды',
-  'стазис-гробницы': 'Некроны',
+  // Стазис-гробницы — это и про стазис, и про тех, кто в них спит
+  'стазис-гробницы': ['Стазис', 'Некроны'],
   некродермиса: "К'тан",
-  'Культы Наслаждения': 'Тёмные эльдар',
+  // Культы Наслаждения — это эльдар до Падения, а не друкари после него
+  'Культы Наслаждения': ['Падение эльдар', 'Слаанеш'],
   // «Чёрный крестовый поход» — перенаправление на настольную игру
-  '13 Чёрных Крестовых Походов': 'Чёрные крестовые походы',
+  '13 Чёрных Крестовых Походов': ['Чёрные крестовые походы', 'Абаддон'],
 
   // Войны за Армагеддон: в таблице лора они названы одними порядковыми
   // числительными, и сами по себе эти слова не значат ничего
@@ -169,6 +171,7 @@ const ALIASES = {
   Монархию: null,
   Вирмвуд: null,
   'Диссонансный Двигатель': null,
+  "крут, веспиды, гуэ'веса": ['Веспиды', "Гуэ'веса"],
   "Высшее Благо (Tau'va)": null,
 }
 
@@ -267,7 +270,12 @@ const chunk = (arr, n) => {
 }
 
 /**
- * Термин → название статьи.
+ * Термин → список названий статей.
+ *
+ * Список, а не одно название: часть терминов лора живёт сразу в
+ * нескольких статьях. «Стазис-гробницы» — это и статья про стазис,
+ * и статья про некронов; пять кораблемиров, перечисленных через
+ * запятую, — пять отдельных статей. Карточка покажет их все.
  *
  * Порядок: ручная таблица, затем точное совпадение (вики сама чинит
  * регистр и разворачивает перенаправления), затем поиск. Результат
@@ -283,7 +291,7 @@ async function resolveTitles(terms) {
     if (term in ALIASES) {
       const alias = ALIASES[term]
       if (alias === null) skip.add(term)
-      else found.set(term, alias)
+      else found.set(term, Array.isArray(alias) ? alias : [alias])
     } else rest.push(term)
   }
 
@@ -296,7 +304,7 @@ async function resolveTitles(terms) {
    * то есть слово из лора, а не название статьи.
    */
   const canonical = new Map()
-  const pending = [...found.values(), ...rest]
+  const pending = [...found.values().flatMap((list) => list), ...rest]
   for (const part of chunk([...new Set(pending)], 40)) {
     const data = await api({ action: 'query', redirects: '1', titles: part.join('|') })
     const back = new Map()
@@ -311,14 +319,19 @@ async function resolveTitles(terms) {
   }
 
   const good = new Map()
-  for (const [term, alias] of found) {
-    const real = canonical.get(alias)
-    if (real) good.set(term, real)
+  const partial = []
+  for (const [term, aliases] of found) {
+    const real = aliases.map((a) => canonical.get(a)).filter(Boolean)
+    // Дубли возможны: два псевдонима могут вести в одну статью
+    const uniq = [...new Set(real)]
+    if (uniq.length) good.set(term, uniq)
+    if (uniq.length !== aliases.length)
+      partial.push(`${term}: не нашлись ${aliases.filter((a) => !canonical.has(a)).join(', ')}`)
   }
   const stillMissing = []
   for (const term of rest) {
     const real = canonical.get(term)
-    if (real) good.set(term, real)
+    if (real) good.set(term, [real])
     else stillMissing.push(term)
   }
 
@@ -332,10 +345,10 @@ async function resolveTitles(terms) {
     })
     const hit = data.query?.search?.[0]
     if (!hit || isMedia(hit.title)) continue
-    if (sameThing(term, hit.title)) good.set(term, hit.title)
+    if (sameThing(term, hit.title)) good.set(term, [hit.title])
   }
 
-  return { titles: good, skipped: skip }
+  return { titles: good, skipped: skip, partial }
 }
 
 const norm = (s) =>
@@ -563,7 +576,7 @@ async function main() {
   mkdirSync(THUMBS, { recursive: true })
 
   const previous = !force && existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : {}
-  const { titles, skipped } = await resolveTitles(terms)
+  const { titles, skipped, partial } = await resolveTitles(terms)
   console.log(`Связано со статьями: ${titles.size}`)
 
   const out = {}
@@ -571,86 +584,55 @@ async function main() {
   let reused = 0
   const empty = []
 
-  for (const [term, title] of titles) {
-    // Из кеша берём только то, что не разошлось с таблицами: иначе правка
-    // ALIASES или LIGHT_THUMBS молча не доезжала бы до данных
+  // Статьи, уже разобранные в этом запуске: один термин ведёт в «Стазис»
+  // и «Некроны», другой — снова в «Некроны». Дважды не качаем.
+  const articleCache = new Map()
+
+  for (const [term, list] of titles) {
+    /*
+     * Из кеша берём только то, что не разошлось с таблицами: иначе правка
+     * ALIASES или LIGHT_THUMBS молча не доезжала бы до данных.
+     */
     const cached = previous[term]
     if (
-      cached?.title === title &&
-      cached.extract &&
-      !!cached.lightThumb === (LIGHT_THUMBS.has(title) && !!cached.thumb)
+      Array.isArray(cached) &&
+      cached.length === list.length &&
+      cached.every(
+        (a, i) =>
+          a.title === list[i] &&
+          a.extract &&
+          !!a.lightThumb === (LIGHT_THUMBS.has(a.title) && !!a.thumb),
+      )
     ) {
       out[term] = cached
+      cached.forEach((a) => articleCache.set(a.title, a))
       reused += 1
       continue
     }
-    const [parsed, info] = await Promise.all([
-      // redirects — обязательно: «Император» и «Магнус Красный» на вики
-      // перенаправления, и без этого вместо статьи приходит страница
-      // с единственной строкой «Перенаправление на:»
-      api({ action: 'parse', prop: 'text', section: '0', redirects: '1', page: title }),
-      api({
-        action: 'query',
-        prop: 'pageimages',
-        // Размер оригинала нужен, чтобы не брать растянутое: вики
-        // послушно увеличивает мелкую картинку до запрошенного размера,
-        // и «Древние» из 260×75 превращались в мыльные 800×229
-        piprop: 'thumbnail|original',
-        // 800 по длинной стороне. Раньше стояло 260 — при ширине
-        // карточки в 800 пикселей такая миниатюра растягивалась втрое
-        pithumbsize: '800',
-        titles: title,
-      }),
-    ])
-    let extract = parsed?.parse?.text?.['*']
-      ? leadParagraph(parsed.parse.text['*'], title)
-      : null
 
-    // У части статей нулевая секция — одна картинка или инфобокс без
-    // текста («Культ генокрадов», «Waaagh!», «Администратум»). Тогда
-    // читаем страницу целиком и берём первый абзац оттуда.
-    if (!extract) {
-      const whole = await api({ action: 'parse', prop: 'text', redirects: '1', page: title })
-      if (whole?.parse?.text?.['*']) extract = leadParagraph(whole.parse.text['*'], title)
-    }
-
-    if (!extract) {
-      empty.push(`${term} → ${title}`)
-      continue
-    }
-    const page = Object.values(info.query.pages)[0]
-    // Оригинал меньше запрошенного — берём его, а не растянутую копию
-    const orig = page?.original
-    const small = orig && Math.max(orig.width, orig.height) <= 800
-    const pic = small ? orig : page?.thumbnail
-
-    // Несколько терминов ведут в одну статью (четыре касты тау — в одну);
-    // картинку такой статьи качаем один раз
-    let thumb = null
-    if (pic) {
-      thumb = thumbCache.get(title)
-      if (thumb === undefined) {
-        thumb = await fetchThumb(pic.source, title)
-        thumbCache.set(title, thumb)
+    const articles = []
+    for (const title of list) {
+      const done = articleCache.get(title)
+      if (done) {
+        articles.push(done)
+        continue
       }
+      const article = await fetchArticle(title)
+      if (!article) {
+        empty.push(`${term} → ${title}`)
+        continue
+      }
+      articleCache.set(title, article)
+      articles.push(article)
     }
-    out[term] = {
-      title,
-      extract: trim(extract),
-      ...(thumb
-        ? {
-            thumb,
-            thumbWidth: pic.width,
-            thumbHeight: pic.height,
-            ...(LIGHT_THUMBS.has(title) ? { lightThumb: true } : {}),
-          }
-        : {}),
-    }
+
+    if (articles.length === 0) continue
+    out[term] = articles
     fetched += 1
     // Возврат каретки только в терминале: в файле или конвейере он не
     // затирает строку, и лог превращается в одну простыню из ста строк
     if (process.stdout.isTTY)
-      process.stdout.write(`\r  скачано ${fetched}, из кеша ${reused}   `)
+      process.stdout.write(`\r  собрано ${fetched}, из кеша ${reused}   `)
   }
   if (process.stdout.isTTY) process.stdout.write('\r' + ' '.repeat(40) + '\r')
 
@@ -658,8 +640,17 @@ async function main() {
 
   const linked = Object.keys(out)
   const unlinked = terms.filter((t) => !out[t])
-  console.log(`\nВ карточках: ${linked.length} (скачано ${fetched}, из кеша ${reused})`)
-  console.log(`С миниатюрой: ${linked.filter((t) => out[t].thumb).length}`)
+  const multi = linked.filter((t) => out[t].length > 1)
+  console.log(`\nВ карточках: ${linked.length} (собрано ${fetched}, из кеша ${reused})`)
+  console.log(`С миниатюрой: ${linked.filter((t) => out[t].some((a) => a.thumb)).length}`)
+  console.log(`С несколькими статьями: ${multi.length}`)
+  if (multi.length)
+    multi.forEach((t) => console.log(`  ${t} → ${out[t].map((a) => a.title).join(' + ')}`))
+
+  if (partial.length) {
+    console.log(`\nЧасть статей из таблицы не найдена (${partial.length}):`)
+    partial.forEach((p) => console.log('  ' + p))
+  }
 
   if (empty.length) {
     console.log(`\nСтатья есть, но абзац не извлёкся (${empty.length}):`)
@@ -670,6 +661,66 @@ async function main() {
   for (const t of unlinked) {
     const why = skipped.has(t) ? 'статьи нет' : 'не найдено'
     console.log(`  ${t}  — ${why}`)
+  }
+}
+
+/** Снимает со статьи первый абзац и заглавную картинку. */
+async function fetchArticle(title) {
+  const [parsed, info] = await Promise.all([
+    // redirects — обязательно: «Император» и «Магнус Красный» на вики
+    // перенаправления, и без этого вместо статьи приходит страница
+    // с единственной строкой «Перенаправление на:»
+    api({ action: 'parse', prop: 'text', section: '0', redirects: '1', page: title }),
+    api({
+      action: 'query',
+      prop: 'pageimages',
+      // Размер оригинала нужен, чтобы не брать растянутое: вики
+      // послушно увеличивает мелкую картинку до запрошенного размера,
+      // и «Древние» из 260×75 превращались в мыльные 800×229
+      piprop: 'thumbnail|original',
+      // 800 по длинной стороне. Раньше стояло 260 — при ширине
+      // карточки в 800 пикселей такая миниатюра растягивалась втрое
+      pithumbsize: '800',
+      titles: title,
+    }),
+  ])
+  let extract = parsed?.parse?.text?.['*'] ? leadParagraph(parsed.parse.text['*'], title) : null
+
+  // У части статей нулевая секция — одна картинка или инфобокс без
+  // текста («Культ генокрадов», «Waaagh!», «Администратум»). Тогда
+  // читаем страницу целиком и берём первый абзац оттуда.
+  if (!extract) {
+    const whole = await api({ action: 'parse', prop: 'text', redirects: '1', page: title })
+    if (whole?.parse?.text?.['*']) extract = leadParagraph(whole.parse.text['*'], title)
+  }
+  if (!extract) return null
+
+  const page = Object.values(info.query.pages)[0]
+  // Оригинал меньше запрошенного — берём его, а не растянутую копию
+  const orig = page?.original
+  const small = orig && Math.max(orig.width, orig.height) <= 800
+  const pic = small ? orig : page?.thumbnail
+
+  let thumb = null
+  if (pic) {
+    thumb = thumbCache.get(title)
+    if (thumb === undefined) {
+      thumb = await fetchThumb(pic.source, title)
+      thumbCache.set(title, thumb)
+    }
+  }
+
+  return {
+    title,
+    extract: trim(extract),
+    ...(thumb
+      ? {
+          thumb,
+          thumbWidth: pic.width,
+          thumbHeight: pic.height,
+          ...(LIGHT_THUMBS.has(title) ? { lightThumb: true } : {}),
+        }
+      : {}),
   }
 }
 

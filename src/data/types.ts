@@ -131,7 +131,7 @@ export interface SectionMeta {
  * страницу вики во фрейм нельзя — Fandom это запрещает заголовком
  * X-Frame-Options.
  */
-export interface WikiEntry {
+export interface WikiArticle {
   /** Название статьи на вики — может отличаться от термина в лоре. */
   title: string
   /** Первый содержательный абзац, обрезанный по границе предложения. */
@@ -147,6 +147,15 @@ export interface WikiEntry {
    */
   lightThumb?: boolean
 }
+
+/**
+ * Справка по термину: одна статья или несколько.
+ *
+ * Несколько — потому что часть терминов лора живёт сразу в двух местах
+ * вики. «Стазис-гробницы» — это и статья о стазисе, и статья о некронах;
+ * ни одна из них по отдельности термин не объясняет.
+ */
+export type WikiEntry = WikiArticle[]
 
 /** Итоговый раздел: текст + редакторский слой + картинки. */
 export interface Section extends ParsedSection, SectionMeta {

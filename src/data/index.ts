@@ -42,6 +42,10 @@ function assemble(): Section[] {
   })
 }
 
+/** Таблица примархов узнаётся по колонкам, а не по номеру в разделе. */
+const isPrimarchTable = (b: Block) =>
+  b.type === 'table' && b.head[0] === '№' && b.head[1] === 'Примарх'
+
 /**
  * Находит для каждого термина блок, где раздел упоминает его впервые.
  *
@@ -54,6 +58,11 @@ function firstMentions(blocks: Block[]): Record<string, number> {
   const first: Record<string, number> = {}
 
   blocks.forEach((block, index) => {
+    // Таблицу легионов пропускаем: ссылок в ней нет, справка по примархам
+    // живёт на карточках галереи. Иначе таблица считалась бы первым
+    // упоминанием, и имя не стало бы ссылкой уже нигде в разделе.
+    if (isPrimarchTable(block)) return
+
     const texts: string[] = []
     if ('text' in block) texts.push(block.text)
     if ('items' in block) texts.push(...block.items)
@@ -101,7 +110,7 @@ function inPageOrder(section: Section): SectionImage[] {
     let headings = 0
     for (const block of section.blocks) {
       if (block.type === 'heading') headings += 1
-      if (block.type === 'table' && block.head[0] === '№' && block.head[1] === 'Примарх') {
+      if (isPrimarchTable(block)) {
         headingsBeforeTable = headings
         break
       }
@@ -148,11 +157,11 @@ const MEASURED: Record<string, number>[] = [
     'war-in-heaven': 5922,
     'eldar-fall': 7095,
     'pre-imperium': 2857,
-    'emperor-crusade': 11309,
+    'emperor-crusade': 11313,
     'horus-heresy': 6788,
     'ten-thousand-years': 5467,
     chaos: 3405,
-    xenos: 7339,
+    xenos: 7369,
     indomitus: 6831,
     thesis: 1694,
     disputed: 3370,
@@ -162,11 +171,11 @@ const MEASURED: Record<string, number>[] = [
     'war-in-heaven': 5376,
     'eldar-fall': 4668,
     'pre-imperium': 2492,
-    'emperor-crusade': 8312,
+    'emperor-crusade': 8301,
     'horus-heresy': 6002,
     'ten-thousand-years': 5599,
     chaos: 4270,
-    xenos: 5527,
+    xenos: 5528,
     indomitus: 5769,
     thesis: 1768,
     disputed: 4008,
@@ -176,11 +185,11 @@ const MEASURED: Record<string, number>[] = [
     'war-in-heaven': 6966,
     'eldar-fall': 5965,
     'pre-imperium': 3280,
-    'emperor-crusade': 9454,
+    'emperor-crusade': 9442,
     'horus-heresy': 7786,
     'ten-thousand-years': 7345,
     chaos: 5969,
-    xenos: 6856,
+    xenos: 6857,
     indomitus: 7022,
     thesis: 2252,
     disputed: 5117,

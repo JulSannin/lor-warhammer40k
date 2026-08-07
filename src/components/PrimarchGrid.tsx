@@ -1,6 +1,8 @@
 import { memo } from 'react'
+import { wiki } from '../data'
 import type { Block, SectionImage } from '../data/types'
 import { ZoomableImage } from './Lightbox'
+import { WikiHoverCard } from './WikiCard'
 import './PrimarchGrid.css'
 
 /** Убирает `**жирный**` и `*курсив*` — в карточке разметка не нужна. */
@@ -40,11 +42,12 @@ export const PrimarchGrid = memo(function PrimarchGrid({
               ? 'loyal'
               : 'unknown'
 
-          return (
-            <li
-              key={num}
-              className={`pg__card pg__card--${verdict}${erased ? ' is-erased' : ''}`}
-            >
+          // Справка берётся по имени из таблицы. Оно же — ключ в данных
+          // вики, поэтому галерея и справки не могут разойтись.
+          const hasWiki = name in wiki
+
+          const card = (
+            <>
               <div className="pg__frame">
                 {img ? (
                   <ZoomableImage image={img} />
@@ -56,10 +59,19 @@ export const PrimarchGrid = memo(function PrimarchGrid({
               </div>
               <div className="pg__body">
                 <span className="pg__num">{num}</span>
-                <span className="pg__name">{name}</span>
+                <span className={`pg__name${hasWiki ? ' pg__name--wiki' : ''}`}>{name}</span>
                 <span className="pg__legion">{legion}</span>
                 {fate !== '—' && <span className="pg__fate">{fate}</span>}
               </div>
+            </>
+          )
+
+          return (
+            <li
+              key={num}
+              className={`pg__card pg__card--${verdict}${erased ? ' is-erased' : ''}`}
+            >
+              {hasWiki ? <WikiHoverCard term={name}>{card}</WikiHoverCard> : card}
             </li>
           )
         })}
