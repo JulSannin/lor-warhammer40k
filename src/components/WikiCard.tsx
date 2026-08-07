@@ -170,10 +170,17 @@ export function WikiProvider({ children }: { children: ReactNode }) {
  * а не ведёт по адресу. Ссылка на саму вики есть внутри карточки —
  * там же, где ей и место.
  */
-export function WikiTerm({ term }: { term: string }) {
+export function WikiTerm({ term, plain }: { term: string; plain?: boolean }) {
   const { open } = useWiki()
   return (
-    <button type="button" className="wiki-term" onClick={() => open(term)}>
+    <button
+      type="button"
+      // В тексте термин заменяет собой <strong> и остаётся жирным.
+      // В таблице легионов исходник жирным не был — там начертание
+      // берётся у клетки, иначе две колонки становятся неразличимы.
+      className={`wiki-term${plain ? ' wiki-term--plain' : ''}`}
+      onClick={() => open(term)}
+    >
       {term}
       <span className="visually-hidden"> — открыть справку</span>
     </button>

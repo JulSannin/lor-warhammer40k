@@ -1,9 +1,14 @@
 import { memo } from 'react'
+import { wiki } from '../data'
 import type { Block, SectionImage } from '../data/types'
 import { ZoomableImage } from './Lightbox'
 import { PrimarchGrid } from './PrimarchGrid'
 import { RichText } from './RichText'
+import { WikiTerm } from './WikiCard'
 import './Blocks.css'
+
+/** Колонка «Легион» в таблице примархов — единственная кликабельная в ней. */
+const LEGION_COLUMN = 2
 
 function BlockView({ block, linkable }: { block: Block; linkable?: Set<string> }) {
   switch (block.type) {
@@ -58,11 +63,28 @@ function BlockView({ block, linkable }: { block: Block; linkable?: Set<string> }
             <tbody>
               {block.rows.map((row, i) => (
                 <tr key={i}>
-                  {row.map((cell, j) => (
-                    <td key={j}>
-                      <RichText text={cell} linkable={linkable} />
-                    </td>
-                  ))}
+                  {row.map((cell, j) => {
+                    /*
+                     * Названия легионов жирным не выделены, поэтому обычный
+                     * разбор разметки их не тронет — справку по ним вешаем
+                     * здесь, по номеру колонки. Имена примархов в соседней
+                     * колонке оставлены как есть: они уже кликаются
+                     * в галерее строкой выше.
+                     */
+                    const legion =
+                      isPrimarchTable(block) &&
+                      j === LEGION_COLUMN &&
+                      cell.replace(/[*_]/g, '').trim()
+                    return (
+                      <td key={j}>
+                        {legion && legion in wiki ? (
+                          <WikiTerm term={legion} plain />
+                        ) : (
+                          <RichText text={cell} linkable={linkable} />
+                        )}
+                      </td>
+                    )
+                  })}
                 </tr>
               ))}
             </tbody>
