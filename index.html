@@ -28,12 +28,11 @@
     <meta property="og:image:alt" content="Двадцать примархов Warhammer 40,000" />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Forum&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
+    <!--
+      Шрифты лежат в проекте (src/fonts.css), а не тянутся с Google Fonts:
+      их таблица стилей блокировала отрисовку на 676 мс — вдвадцатеро
+      дольше собственного бандла. Внешних запросов у страницы больше нет.
+    -->
 
     <title>Краткий лор Warhammer 40K</title>
   </head>

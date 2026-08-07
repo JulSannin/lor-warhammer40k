@@ -58,7 +58,7 @@ function inPageOrder(section: Section): SectionImage[] {
 export const allImages: SectionImage[] = sections.flatMap(inPageOrder)
 
 /**
- * Высоты разделов, замеренные в браузере при ширине окна 1440px.
+ * Высоты разделов, замеренные в браузере на трёх ширинах окна.
  *
  * Виртуализатору нужен размер раздела до того, как раздел построен: из
  * этих чисел складывается высота документа, а значит и размер ползунка
@@ -67,28 +67,67 @@ export const allImages: SectionImage[] = sections.flatMap(inPageOrder)
  * дёргался, когда виртуализатор заменяет оценку измерением. Замеры точнее
  * любой формулы, а состав лора меняется редко.
  *
+ * Таблиц три, а не одна, потому что от ширины высота зависит сильно и
+ * не монотонно. «Крестовый поход» на телефоне выше, чем на ноутбуке
+ * (11268 против 9403): текст переливается, а галерея примархов идёт
+ * в две колонки вместо пяти. А «Война в Небесах», наоборот, ниже
+ * (5908 против 6952): широкие кадры 16:9 на узком экране мельчают.
+ * С одной таблицей от 1440px высота документа на телефоне уезжала
+ * на 10%, на планшете на 17% — и ползунок подрастал по ходу чтения.
+ *
  * Перемерять нужно не только после правки лора, но и после любой правки
  * раскладки — числа колонок в галерее примархов, сетки картинок, отступов.
- * Делается так:
- * открыть сайт, прокрутить до конца и выполнить в консоли
+ * Делается так: открыть сайт на нужной ширине, прокрутить до конца и
+ * обратно, собирая по ходу
  *   `Object.fromEntries([...document.querySelectorAll('.section')]
  *      .map(s => [s.id, Math.round(s.getBoundingClientRect().height)]))`
- * — но собирать значения придётся по ходу прокрутки, потому что в DOM
- * одновременно находятся только соседние разделы.
+ * — собирать придётся по ходу прокрутки, потому что в DOM одновременно
+ * находятся только соседние разделы.
  */
-const MEASURED: Record<string, number> = {
-  'war-in-heaven': 6952,
-  'eldar-fall': 5952,
-  'pre-imperium': 3277,
-  'emperor-crusade': 9403,
-  'horus-heresy': 7741,
-  'ten-thousand-years': 7332,
-  chaos: 5964,
-  xenos: 6871,
-  indomitus: 7004,
-  thesis: 2251,
-  disputed: 5111,
-}
+const MEASURED: Record<string, number>[] = [
+  // 390px — телефон
+  {
+    'war-in-heaven': 5908,
+    'eldar-fall': 7024,
+    'pre-imperium': 2825,
+    'emperor-crusade': 11268,
+    'horus-heresy': 6744,
+    'ten-thousand-years': 5396,
+    chaos: 3371,
+    xenos: 7265,
+    indomitus: 6780,
+    thesis: 1693,
+    disputed: 3364,
+  },
+  // 834px — планшет
+  {
+    'war-in-heaven': 5362,
+    'eldar-fall': 4655,
+    'pre-imperium': 2489,
+    'emperor-crusade': 8261,
+    'horus-heresy': 5989,
+    'ten-thousand-years': 5587,
+    chaos: 4265,
+    xenos: 5510,
+    indomitus: 5752,
+    thesis: 1767,
+    disputed: 4002,
+  },
+  // 1440px — ноутбук и шире
+  {
+    'war-in-heaven': 6952,
+    'eldar-fall': 5952,
+    'pre-imperium': 3277,
+    'emperor-crusade': 9403,
+    'horus-heresy': 7741,
+    'ten-thousand-years': 7332,
+    chaos: 5964,
+    xenos: 6871,
+    indomitus: 7004,
+    thesis: 2251,
+    disputed: 5111,
+  },
+]
 
 /** Запасная оценка для раздела, которого ещё нет в таблице замеров. */
 function guessHeight(section: Section): number {
@@ -123,4 +162,19 @@ function guessHeight(section: Section): number {
   return h + 150
 }
 
-export const sectionHeights: number[] = sections.map((s) => MEASURED[s.id] ?? guessHeight(s))
+/**
+ * Какая из таблиц замеров подходит окну такой ширины.
+ *
+ * Границы — примерно посередине между ширинами замеров, так что окно
+ * всегда берёт ближайший к себе набор чисел.
+ */
+export function heightBucket(width: number): number {
+  if (width < 620) return 0
+  if (width < 1140) return 1
+  return 2
+}
+
+/** Оценки высот разделов по каждой из таблиц замеров. */
+export const sectionHeights: number[][] = MEASURED.map((table) =>
+  sections.map((s) => table[s.id] ?? guessHeight(s)),
+)
