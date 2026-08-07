@@ -158,12 +158,11 @@ export default function App() {
   const goTo = useCallback(
     (index: number) => {
       if (index < 0 || index >= sections.length) return
-      virtualizer.scrollToIndex(index, { align: 'start' })
 
       let raf = 0
       let stopped = false
       let steady = 0
-      const deadline = performance.now() + 2500
+      const deadline = performance.now() + 4000
 
       const stop = () => {
         stopped = true
@@ -173,30 +172,124 @@ export default function App() {
         window.removeEventListener('keydown', stop)
       }
 
+      /** Точное положение начала раздела, если он уже построен. */
+      const exact = () => {
+        const el = document.getElementById(sections[index].id)
+        return el ? window.scrollY + el.getBoundingClientRect().top : null
+      }
+
+      /** Доводка: раздел домеряется на подлёте, и остаток надо выбрать. */
       const settle = () => {
         if (stopped) return
         if (performance.now() > deadline) return stop()
 
         const el = document.getElementById(sections[index].id)
         if (!el) {
-          // Раздел ещё не построен — просим виртуализатор ещё раз
           virtualizer.scrollToIndex(index, { align: 'start' })
           steady = 0
-        } else if (Math.abs(el.getBoundingClientRect().top) > 4) {
-          el.scrollIntoView({ behavior: 'instant', block: 'start' })
-          steady = 0
         } else {
-          steady += 1
+          const dy = el.getBoundingClientRect().top
+          if (Math.abs(dy) > 2) {
+            window.scrollTo({ top: window.scrollY + dy, behavior: 'instant' })
+            steady = 0
+          } else steady += 1
         }
 
-        if (steady < 5) raf = requestAnimationFrame(settle)
+        if (steady < 4) raf = requestAnimationFrame(settle)
         else stop()
+      }
+
+      /** Плавный проезд до заданной точки: быстрое начало, мягкое торможение. */
+      const glideTo = (to: number, duration: number, done: () => void) => {
+        const from = window.scrollY
+        if (Math.abs(to - from) < 4) return done()
+        const started = performance.now()
+        const ease = (t: number) => 1 - Math.pow(1 - t, 3)
+
+        const frame = () => {
+          if (stopped) return
+          const t = Math.min(1, (performance.now() - started) / duration)
+          window.scrollTo({ top: from + (to - from) * ease(t), behavior: 'instant' })
+          if (t < 1) raf = requestAnimationFrame(frame)
+          else done()
+        }
+        raf = requestAnimationFrame(frame)
+      }
+
+      // Сколько проезжаем плавно: чуть больше экрана — этого хватает,
+      // чтобы движение читалось, и не приходится ждать
+      const runway = window.innerHeight * 1.15
+
+      /*
+       * Соседний раздел — едем всю дорогу плавно. Дальний — сначала
+       * встаём на место мгновенно, а потом отступаем на экран назад и
+       * плавно въезжаем.
+       *
+       * Порядок именно такой, и это главное. Везти окно через весь лор
+       * нельзя: по пути строится десяток разделов со всеми картинками,
+       * и пока они достраиваются, цель уезжает прямо под нами — выходили
+       * скачки на тысячи пикселей посреди полёта. Но и просто «прыгнуть
+       * и потом плавно» мало: если доводка идёт после плавного проезда,
+       * она продолжает дёргать окно уже на глазах у читателя.
+       *
+       * Поэтому вся возня — прыжок, построение разделов, доводка до
+       * точного места — делается сразу и невидимо, за доли секунды.
+       * И только когда всё устаканилось, окно отъезжает на экран и
+       * приезжает обратно плавно. После этого не двигается ничего.
+       */
+      const start = () => {
+        const here = window.scrollY
+        const there = exact()
+
+        if (there !== null && Math.abs(there - here) <= runway * 2) {
+          glideTo(there, 520, settle)
+          return
+        }
+
+        virtualizer.scrollToIndex(index, { align: 'start' })
+
+        // Ждём, пока раздел построится и перестанет ёрзать
+        let calm = 0
+        let tries = 0
+        const converge = () => {
+          if (stopped) return
+          const point = exact()
+          if (point === null) {
+            virtualizer.scrollToIndex(index, { align: 'start' })
+            calm = 0
+          } else {
+            const dy = point - window.scrollY
+            if (Math.abs(dy) > 2) {
+              window.scrollTo({ top: point, behavior: 'instant' })
+              calm = 0
+            } else calm += 1
+          }
+
+          // Полсекунды на всё про всё: дальше едем с тем, что есть
+          if (calm < 3 && tries++ < 30) {
+            raf = requestAnimationFrame(converge)
+            return
+          }
+
+          const point2 = exact() ?? window.scrollY
+          const back = point2 - runway * (point2 >= here ? 1 : -1)
+          window.scrollTo({ top: Math.max(0, back), behavior: 'instant' })
+          raf = requestAnimationFrame(() => glideTo(point2, 480, settle))
+        }
+        raf = requestAnimationFrame(converge)
       }
 
       window.addEventListener('wheel', stop, { passive: true, once: true })
       window.addEventListener('touchstart', stop, { passive: true, once: true })
       window.addEventListener('keydown', stop, { once: true })
-      raf = requestAnimationFrame(settle)
+
+      // Читатель попросил не двигать — просто ставим на место
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        virtualizer.scrollToIndex(index, { align: 'start' })
+        raf = requestAnimationFrame(settle)
+      } else {
+        start()
+      }
     },
     [virtualizer],
   )
