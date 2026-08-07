@@ -177,9 +177,10 @@ export const Blocks = memo(function Blocks({
   const out: React.ReactNode[] = []
 
   blocks.forEach((block, i) => {
-    out.push(<BlockView key={`b${i}`} block={block} linkable={linkableByBlock[i]} />)
-
-    // Сразу под таблицей легионов — галерея портретов из неё же
+    // Галерея портретов идёт перед таблицей легионов, а не после:
+    // сначала читатель видит двадцать лиц, а уже потом разбирается,
+    // кто из них кому брат и чем кончил. Строится галерея из той же
+    // таблицы, что стоит следом.
     if (isPrimarchTable(block)) {
       out.push(
         <PrimarchGrid
@@ -189,6 +190,8 @@ export const Blocks = memo(function Blocks({
         />,
       )
     }
+
+    out.push(<BlockView key={`b${i}`} block={block} linkable={linkableByBlock[i]} />)
 
     if (block.type === 'heading') {
       headingIndex += 1
