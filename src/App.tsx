@@ -109,6 +109,31 @@ export default function App() {
     return Math.min(1, Math.max(0, (virtualizer.scrollOffset ?? 0) / scrollable))
   }, [virtualizer.scrollOffset, totalSize, listTop])
 
+  /*
+   * Положение бегунка на шкале в боковой полосе — доля не пиксельная,
+   * а по разделам: номер текущего плюс то, сколько от него пройдено.
+   *
+   * Пиксельная доля тут не годится. Шкала идёт вдоль римских цифр, а
+   * цифры расставлены равномерно, тогда как разделы разной длины:
+   * «Крестовый поход» вдвое длиннее «Главной мысли». На пиксельной доле
+   * бегунок промахивался мимо активного номера на одну позицию — и вся
+   * затея со шкалой-линейкой рассыпалась. Процент под шкалой остаётся
+   * пиксельным: он отвечает на другой вопрос — сколько текста позади.
+   */
+  const railPosition = useMemo(() => {
+    const index = sections.findIndex((s) => s.id === activeId)
+    if (index === -1) return progress < 0.5 ? 0 : 1
+
+    const el = document.getElementById(sections[index].id)
+    let within = 0
+    if (el) {
+      const rect = el.getBoundingClientRect()
+      const passable = rect.height - window.innerHeight
+      if (passable > 0) within = Math.min(1, Math.max(0, -rect.top / passable))
+    }
+    return (index + within) / sections.length
+  }, [activeId, progress])
+
   /**
    * Перейти к разделу, не оставляя якорь в адресной строке.
    *
@@ -221,6 +246,7 @@ export default function App() {
               sections={sections}
               activeId={activeId}
               progress={progress}
+              railPosition={railPosition}
               pinned={pinned}
               onPinnedChange={setPinned}
             />

@@ -35,8 +35,27 @@
   color: var(--gold);
 }
 
-.rail__marks {
+/*
+ * Шкала прочитанного и римские цифры — один блок, и высота у них общая.
+ * Она задаётся цифрами: обёртка растягивается по свободному месту,
+ * а внутренний ряд сжимается по содержимому и центрируется. Так
+ * заполненная часть шкалы всегда указывает на конкретный номер раздела.
+ */
+.rail__gauge {
   flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+.rail__gauge-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  max-height: 100%;
+}
+
+.rail__marks {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -83,16 +102,36 @@ a.rail__mark:active {
 
 /* Полоса прочитанного */
 .rail__progress {
+  position: relative;
+  flex: none;
   width: 2px;
-  height: 22%;
   background: var(--line-strong);
   border-radius: 1px;
-  overflow: hidden;
 }
 
 .rail__progress-fill {
+  position: relative;
   width: 100%;
   background: linear-gradient(to bottom, var(--gold-dim), var(--gold));
+  border-radius: 1px;
+}
+
+/*
+ * Точка на конце заливки — та самая «где я сейчас». Без неё край
+ * градиента теряется на тёмном фоне, и шкала опять читается как
+ * просто линия.
+ */
+.rail__progress-fill::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  translate: -50% 0;
+  background: var(--gold);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgb(200 165 75 / 0.6);
 }
 
 .rail__percent {

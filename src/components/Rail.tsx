@@ -7,6 +7,8 @@ interface RailProps {
   sections: Section[]
   activeId: string | null
   progress: number
+  /** Положение бегунка на шкале: доля не по пикселям, а по разделам. */
+  railPosition: number
   /** Панель закреплена — контент сдвигается, а не перекрывается. */
   pinned: boolean
   onPinnedChange: (pinned: boolean) => void
@@ -25,7 +27,14 @@ function railMark(section: Section): string {
   return section.id === 'disputed' ? '?' : '✦'
 }
 
-export function Rail({ sections, activeId, progress, pinned, onPinnedChange }: RailProps) {
+export function Rail({
+  sections,
+  activeId,
+  progress,
+  railPosition,
+  pinned,
+  onPinnedChange,
+}: RailProps) {
   const [hovered, setHovered] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const panelId = useId()
@@ -105,39 +114,54 @@ export function Rail({ sections, activeId, progress, pinned, onPinnedChange }: R
             <span className="visually-hidden">Открыть список разделов</span>
           </button>
 
-          <ul className="rail__marks">
-            {sections.map((s) => {
-              const cls = `rail__mark${s.id === activeId ? ' is-active' : ''}`
-              const style = { '--accent': s.accent } as React.CSSProperties
-              // На тач-устройстве метка — ссылка: наведения там нет, и панель
-              // сама не раскроется. С мышью она остаётся индикатором, иначе
-              // после закрытия панели курсор попадает по случайной цифре.
-              return (
-                <li key={s.id}>
-                  {touch ? (
-                    <a href={`#${s.id}`} className={cls} style={style} title={s.navLabel}>
-                      <span aria-hidden="true">{railMark(s)}</span>
-                      <span className="visually-hidden">{s.navLabel}</span>
-                    </a>
-                  ) : (
-                    <span className={cls} style={style}>
-                      {railMark(s)}
-                    </span>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
+          {/*
+            Шкала прочитанного идёт вдоль римских цифр и ровно на их высоту.
+            Раньше это была отдельная короткая полоска под ними: она честно
+            показывала долю, но ни с чем не соотносилась — по ней нельзя
+            было понять, докуда дочитал. Теперь заполненная часть
+            останавливается напротив номера раздела, который сейчас на
+            экране, и полоса читается как линейка, а не как украшение.
+          */}
+          <div className="rail__gauge">
+            <div className="rail__gauge-row">
+              <div
+                className="rail__progress"
+                role="progressbar"
+                aria-label="Прочитано"
+                aria-valuenow={Math.round(progress * 100)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                <div
+                  className="rail__progress-fill"
+                  style={{ height: `${railPosition * 100}%` }}
+                />
+              </div>
 
-          <div
-            className="rail__progress"
-            role="progressbar"
-            aria-label="Прочитано"
-            aria-valuenow={Math.round(progress * 100)}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          >
-            <div className="rail__progress-fill" style={{ height: `${progress * 100}%` }} />
+              <ul className="rail__marks">
+                {sections.map((s) => {
+                  const cls = `rail__mark${s.id === activeId ? ' is-active' : ''}`
+                  const style = { '--accent': s.accent } as React.CSSProperties
+                  // На тач-устройстве метка — ссылка: наведения там нет, и панель
+                  // сама не раскроется. С мышью она остаётся индикатором, иначе
+                  // после закрытия панели курсор попадает по случайной цифре.
+                  return (
+                    <li key={s.id}>
+                      {touch ? (
+                        <a href={`#${s.id}`} className={cls} style={style} title={s.navLabel}>
+                          <span aria-hidden="true">{railMark(s)}</span>
+                          <span className="visually-hidden">{s.navLabel}</span>
+                        </a>
+                      ) : (
+                        <span className={cls} style={style}>
+                          {railMark(s)}
+                        </span>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
           </div>
 
           <span className="rail__percent">{Math.round(progress * 100)}</span>
