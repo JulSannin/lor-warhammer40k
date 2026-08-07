@@ -6,13 +6,17 @@ import { LightboxProvider } from './components/Lightbox'
 import { Rail } from './components/Rail'
 import { SectionView } from './components/SectionView'
 import { useScrollSpy } from './hooks/useScrollSpy'
-import { allImages, epigraph, sections, sectionHeights } from './data'
+import { allImages, epigraph, heightBucket, sections, sectionHeights } from './data'
 import './App.css'
 
 export default function App() {
   const [pinned, setPinned] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
   const [listTop, setListTop] = useState(0)
+  // Не сама ширина, а номер набора замеров: перерисовываться на каждый
+  // пиксель ресайза незачем, высоты меняются только на границах
+  const [bucket, setBucket] = useState(() => heightBucket(window.innerWidth))
+  const heights = sectionHeights[bucket]
 
   /*
    * Виртуализация окна прокрутки.
@@ -28,10 +32,17 @@ export default function App() {
    * прямо в кадре. Больше не нужно: раздел лора — это тысячи пикселей
    * высоты и до полудюжины картинок, и лишний запас окупается только
    * расходом памяти.
+   *
+   * Набор оценок зависит от ширины окна: от неё высота раздела зависит
+   * сильно, и от одной таблицы на все ширины документ на телефоне уезжал
+   * на десятую часть. Сбрасывать уже снятые измерения при смене ширины
+   * не нужно — раздел перемеряется сам, когда снова попадает на экран.
+   * Пробовал звать virtualizer.measure(): он перестраивается синхронно,
+   * а ресайз приходит посреди отрисовки, и React ругался на flushSync.
    */
   const virtualizer = useWindowVirtualizer({
     count: sections.length,
-    estimateSize: (i) => sectionHeights[i],
+    estimateSize: (i) => heights[i],
     overscan: 1,
     scrollMargin: listTop,
   })
@@ -43,6 +54,32 @@ export default function App() {
     measure()
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
+  }, [])
+
+  /*
+   * Смена набора оценок — отдельно от замера отступа и следующим кадром.
+   * Она двигает все разделы разом, наблюдатель размеров тут же сообщает
+   * виртуализатору новые размеры, и прямо в обработчике ресайза это
+   * приводило к flushSync посреди отрисовки — React на такое ругается.
+   *
+   * Отсрочка убирает почти все такие случаи, но не все: смена ширины
+   * с переходом в самый узкий набор всё ещё даёт одно предупреждение
+   * в консоли — flushSync зовёт сама библиотека из своего наблюдателя.
+   * В прод-сборке React такие предупреждения не печатает, на поведение
+   * это не влияет: положение разделов и высота документа после ресайза
+   * верные.
+   */
+  useEffect(() => {
+    let raf = 0
+    const onResize = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => setBucket(heightBucket(window.innerWidth)))
+    }
+    window.addEventListener('resize', onResize)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', onResize)
+    }
   }, [])
 
   const items = virtualizer.getVirtualItems()
